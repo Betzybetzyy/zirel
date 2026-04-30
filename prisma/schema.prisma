@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {                                                                                                                                                                                         
+    provider        = "prisma-client-js"                                                                                                                                                                     
+} 
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================
+// CATEGORÍAS (Anillos, Aros, Pulseras, Collares)
+// ============================================
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique          // "Anillos"
+  slug        String    @unique          // "anillos"
+  description String?
+  order       Int       @default(0)      // Para ordenarlas en el menú
+
+  products    Product[]                  // Relación: una categoría tiene muchos productos
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("categories")
+}
+
+// ============================================
+// PRODUCTOS (las joyas)
+// ============================================
+model Product {
+  id          String    @id @default(cuid())
+  sku         String    @unique          // "ANI-001"
+  slug        String    @unique          // "anillo-triple-circon"
+  name        String                     // "Anillo Triple Circón"
+  description String                     // Descripción larga
+  price       Int                        // En pesos chilenos (sin decimales)
+  size        String?                    // "Talla 19", "20mm diámetro", etc
+  material    String    @default("Plata 925")
+  stock       Int       @default(0)
+  active      Boolean   @default(true)   // Para ocultar sin borrar
+  featured    Boolean   @default(false)  // Para mostrar en home
+
+  // Relación con categoría
+  categoryId  String
+  category    Category  @relation(fields: [categoryId], references: [id])
+
+  // Relación con imágenes
+  images      ProductImage[]
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("products")
+  @@index([categoryId])
+  @@index([active, featured])
+}
+
+// ============================================
+// IMÁGENES (cada producto puede tener varias)
+// ============================================
+model ProductImage {
+  id        String   @id @default(cuid())
+  url       String                       // URL de Cloudinary
+  alt       String?                      // Texto alternativo para SEO/accesibilidad
+  order     Int      @default(0)         // Para ordenar las fotos del producto
+  isPrimary Boolean  @default(false)     // La foto principal del catálogo
+
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@map("product_images")
+  @@index([productId])
+}
