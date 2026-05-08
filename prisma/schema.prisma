@@ -76,3 +76,62 @@ model ProductImage {
   @@map("product_images")
   @@index([productId])
 }
+
+// ============================================
+// PEDIDOS
+// ============================================
+model Order {
+  id              String        @id @default(cuid())
+  orderNumber     Int           @unique @default(autoincrement())  // 1, 2, 3... más amigable que el cuid
+
+  // Datos del cliente
+  customerName    String
+  customerEmail   String
+  customerPhone   String
+  customerAddress String?
+  customerComuna  String?
+  customerNotes   String?
+
+  // Totales
+  subtotal        Int
+  total           Int
+
+  // Estado
+  status          OrderStatus   @default(PENDIENTE)
+  whatsappSent    Boolean       @default(false)
+
+  // Items del pedido
+  items           OrderItem[]
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@map("orders")
+  @@index([status])
+}
+
+model OrderItem {
+  id            String    @id @default(cuid())
+
+  orderId       String
+  order         Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  productId     String
+  productSku    String                                    // Snapshot por si se borra el producto
+  productName   String                                    // Snapshot
+  productPrice  Int                                       // Snapshot del precio al momento de la compra
+  quantity      Int
+
+  createdAt     DateTime  @default(now())
+
+  @@map("order_items")
+  @@index([orderId])
+}
+
+enum OrderStatus {
+  PENDIENTE
+  CONFIRMADO
+  ENVIADO
+  ENTREGADO
+  CANCELADO
+}

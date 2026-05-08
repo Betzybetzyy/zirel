@@ -3,10 +3,15 @@ import { ProductGrid } from "@/components/ui/product-grid";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
-// Genera las páginas estáticas en build (mejora performance)
+export const revalidate = 3600;
+
 export async function generateStaticParams() {
-  const categories = await getCategories();
-  return categories.map((cat) => ({ slug: cat.slug }));
+  try {
+    const categories = await getCategories();
+    return categories.map((cat) => ({ slug: cat.slug }));
+  } catch {
+    return [];
+  }
 }
 
 export async function generateMetadata({

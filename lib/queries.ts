@@ -67,7 +67,7 @@ export async function getProductBySlug(slug: string) {
  */
 export async function getFeaturedProducts(limit = 4) {
   return prisma.product.findMany({
-    where: { active: true },
+    where: { active: true, featured: true },
     include: {
       images: {
         where: { isPrimary: true },

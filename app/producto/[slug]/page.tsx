@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { AddToCartButton } from "@/components/ui/add-to-cart-button";
 
 export async function generateMetadata({
   params,
@@ -48,7 +49,10 @@ export default async function ProductPage({
           Inicio
         </Link>
         <span className="mx-2">·</span>
-        <Link href="/catalogo" className="hover:text-[var(--zirel-dorado-beige)]">
+        <Link
+          href="/catalogo"
+          className="hover:text-[var(--zirel-dorado-beige)]"
+        >
           Catálogo
         </Link>
         <span className="mx-2">·</span>
@@ -138,12 +142,18 @@ export default async function ProductPage({
             </h2>
             <div className="grid grid-cols-2 gap-y-2 text-sm">
               <span className="text-[var(--zirel-cafe-topo)]">Material</span>
-              <span className="text-[var(--zirel-negro-suave)]">{product.material}</span>
+              <span className="text-[var(--zirel-negro-suave)]">
+                {product.material}
+              </span>
 
               {product.size && (
                 <>
-                  <span className="text-[var(--zirel-cafe-topo)]">Talla / Detalle</span>
-                  <span className="text-[var(--zirel-negro-suave)]">{product.size}</span>
+                  <span className="text-[var(--zirel-cafe-topo)]">
+                    Talla / Detalle
+                  </span>
+                  <span className="text-[var(--zirel-negro-suave)]">
+                    {product.size}
+                  </span>
                 </>
               )}
 
@@ -154,18 +164,14 @@ export default async function ProductPage({
             </div>
           </div>
 
-          {/* CTA — placeholder para la Fase 2 (carrito) */}
-          <Button
-            size="lg"
-            className="rounded-none w-full md:w-auto md:px-12"
-            disabled
-          >
-            Agregar al carrito (próximamente)
-          </Button>
-
-          <p className="text-xs text-[var(--zirel-cafe-topo)]/70 mt-4 italic">
-            ✦ El sistema de compras estará disponible muy pronto.
-          </p>
+          <AddToCartButton
+            productId={product.id}
+            sku={product.sku}
+            slug={product.slug}
+            name={product.name}
+            price={product.price}
+            imageUrl={mainImage?.url}
+          />
         </div>
       </div>
     </div>

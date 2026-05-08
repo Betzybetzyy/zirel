@@ -1,6 +1,8 @@
 import { getAllProducts } from "@/lib/queries";
 import { ProductGrid } from "@/components/ui/product-grid";
 
+export const revalidate = 3600;
+
 export const metadata = {
   title: "Catálogo | Zirel Joyería",
   description: "Descubre toda nuestra colección de joyería en plata 925.",
