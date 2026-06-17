@@ -3,14 +3,13 @@
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
-// Validación con Zod
 const orderSchema = z.object({
-  customerName: z.string().min(2, "Nombre muy corto"),
-  customerEmail: z.string().email("Email inválido"),
-  customerPhone: z.string().min(8, "Teléfono inválido"),
-  customerAddress: z.string().optional(),
-  customerComuna: z.string().optional(),
-  customerNotes: z.string().optional(),
+  customerName: z.string().min(2, "Nombre muy corto").max(100),
+  customerEmail: z.string().check(z.email({ error: "Email inválido" })),
+  customerPhone: z.string().min(8, "Teléfono inválido").max(20),
+  customerAddress: z.string().max(200).optional(),
+  customerComuna: z.string().max(100).optional(),
+  customerNotes: z.string().max(500).optional(),
   items: z
     .array(
       z.object({
@@ -18,7 +17,7 @@ const orderSchema = z.object({
         sku: z.string(),
         name: z.string(),
         price: z.number(),
-        quantity: z.number().min(1),
+        quantity: z.number().min(1).max(99),
       })
     )
     .min(1, "El carrito está vacío"),
@@ -28,16 +27,29 @@ export type CreateOrderInput = z.infer<typeof orderSchema>;
 
 export async function createOrder(input: CreateOrderInput) {
   try {
-    // Validar
     const data = orderSchema.parse(input);
 
-    // Calcular totales (en el servidor, NO confiamos en el cliente)
-    const subtotal = data.items.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0
-    );
+    // Verificar productos contra BD: existencia, estado activo y precios reales
+    const productIds = data.items.map((i) => i.productId);
+    const dbProducts = await prisma.product.findMany({
+      where: { id: { in: productIds }, active: true },
+      select: { id: true, price: true, sku: true, name: true },
+    });
 
-    // Crear pedido + items en una sola transacción
+    if (dbProducts.length !== productIds.length) {
+      return {
+        success: false as const,
+        error: "Uno o más productos ya no están disponibles",
+      };
+    }
+
+    const priceMap = new Map(dbProducts.map((p) => [p.id, p.price]));
+
+    // Calcular subtotal con precios de BD, nunca del cliente
+    const subtotal = data.items.reduce((sum, item) => {
+      return sum + priceMap.get(item.productId)! * item.quantity;
+    }, 0);
+
     const order = await prisma.order.create({
       data: {
         customerName: data.customerName,
@@ -47,20 +59,18 @@ export async function createOrder(input: CreateOrderInput) {
         customerComuna: data.customerComuna,
         customerNotes: data.customerNotes,
         subtotal,
-        total: subtotal, // Por ahora sin costos de envío
+        total: subtotal,
         items: {
           create: data.items.map((item) => ({
             productId: item.productId,
             productSku: item.sku,
             productName: item.name,
-            productPrice: item.price,
+            productPrice: priceMap.get(item.productId)!,
             quantity: item.quantity,
           })),
         },
       },
-      include: {
-        items: true,
-      },
+      include: { items: true },
     });
 
     return { success: true as const, order };
@@ -71,7 +81,7 @@ export async function createOrder(input: CreateOrderInput) {
         error: error.issues[0]?.message || "Datos inválidos",
       };
     }
-    console.error("Error creando pedido:", error);
+    console.error("[createOrder]", error instanceof Error ? error.message : error);
     return {
       success: false as const,
       error: "Error al crear el pedido. Inténtalo de nuevo.",

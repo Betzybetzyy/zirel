@@ -12,7 +12,21 @@ export default async function PedidoConfirmadoPage({
   searchParams: Promise<{ n?: string; wsp?: string }>;
 }) {
   const { n, wsp } = await searchParams;
-  const whatsappUrl = wsp ? decodeURIComponent(wsp) : null;
+
+  const orderNumber = n && /^\d+$/.test(String(n)) ? n : null;
+
+  let whatsappUrl: string | null = null;
+  if (wsp && typeof wsp === "string") {
+    try {
+      const decoded = decodeURIComponent(wsp);
+      const url = new URL(decoded);
+      if (url.hostname === "wa.me" && url.protocol === "https:") {
+        whatsappUrl = decoded;
+      }
+    } catch {
+      // URL inválida — ignorar
+    }
+  }
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-20 text-center">
@@ -24,9 +38,9 @@ export default async function PedidoConfirmadoPage({
       </h1>
       <div className="w-20 h-px bg-[var(--zirel-dorado-beige)] mx-auto mb-6" />
 
-      {n && (
+      {orderNumber && (
         <p className="text-sm tracking-widest uppercase text-[var(--zirel-cafe-topo)] mb-6">
-          Pedido #{n}
+          Pedido #{orderNumber}
         </p>
       )}
 

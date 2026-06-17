@@ -9,14 +9,12 @@ import * as path from "path";
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
-// Configurar Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Tipos
 type ProductRow = {
   SKU: string;
   Categoría: string;
@@ -30,11 +28,9 @@ type ProductRow = {
   Activo: string;
 };
 
-// Configuración
 const EXCEL_PATH = path.join(process.cwd(), "seed-data", "inventario.xlsx");
 const FOTOS_DIR = path.join(process.cwd(), "seed-data", "fotos");
 
-// Mapeo categoría → carpeta + slug
 const CATEGORY_CONFIG: Record<
   string,
   { folder: string; slug: string; description: string; order: number }
@@ -65,15 +61,11 @@ const CATEGORY_CONFIG: Record<
   },
 };
 
-/**
- * Convierte el nombre del producto en un slug URL-friendly
- * "Anillo Triple Circón" → "anillo-triple-circon"
- */
 function slugify(text: string): string {
   return text
     .toLowerCase()
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "") // Quitar tildes
+    .replace(/[̀-ͯ]/g, "")
     .replace(/[^a-z0-9\s-]/g, "")
     .trim()
     .replace(/\s+/g, "-")
@@ -94,42 +86,37 @@ function findPhotoPath(dir: string, fileName: string): string | null {
   return null;
 }
 
-/**
- * Sube una imagen a Cloudinary
- */
-async function uploadImage(
-  filePath: string,
-  publicId: string
-): Promise<string> {
+async function uploadImage(filePath: string, publicId: string): Promise<string> {
   const result = await cloudinary.uploader.upload(filePath, {
     folder: "zirel/products",
     public_id: publicId,
     overwrite: true,
     resource_type: "image",
-    transformation: [
-      { quality: "auto:good" },
-      { fetch_format: "auto" },
-    ],
+    transformation: [{ quality: "auto:good" }, { fetch_format: "auto" }],
   });
   return result.secure_url;
 }
 
+function cloudinaryUrl(sku: string): string {
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME!;
+  return `https://res.cloudinary.com/${cloudName}/image/upload/zirel/products/${sku}`;
+}
+
 async function main() {
   const onlyArg = process.argv.find((a) => a.startsWith("--only="));
-  const onlySkus = onlyArg ? new Set(onlyArg.replace("--only=", "").split(",").map((s) => s.trim())) : null;
+  const onlySkus = onlyArg
+    ? new Set(onlyArg.replace("--only=", "").split(",").map((s) => s.trim()))
+    : null;
+  const skipUpload = process.argv.includes("--skip-upload");
 
   console.log("🌱 Iniciando seed de Zirel...\n");
+  if (skipUpload) console.log("   Modo --skip-upload: usa URLs de Cloudinary existentes (no re-sube fotos)\n");
   if (onlySkus) console.log(`   Modo retry — solo SKUs: ${[...onlySkus].join(", ")}\n`);
 
-  // Validar archivos
   if (!fs.existsSync(EXCEL_PATH)) {
     throw new Error(`❌ No se encontró el Excel en: ${EXCEL_PATH}`);
   }
-  if (!fs.existsSync(FOTOS_DIR)) {
-    throw new Error(`❌ No se encontró la carpeta de fotos en: ${FOTOS_DIR}`);
-  }
 
-  // === 1. Leer el Excel ===
   console.log("📄 Leyendo inventario.xlsx...");
   const workbook = XLSX.readFile(EXCEL_PATH);
   const sheet = workbook.Sheets["Inventario Zirel"];
@@ -138,8 +125,8 @@ async function main() {
   const rows = XLSX.utils.sheet_to_json<ProductRow>(sheet, { range: 3 });
   console.log(`   ✓ ${rows.length} productos encontrados en Excel\n`);
 
-  // === 2. Limpiar BD (solo en seed completo) ===
-  if (!onlySkus) {
+  // En modo skip-upload hacemos upsert — no borramos todo
+  if (!onlySkus && !skipUpload) {
     console.log("🧹 Limpiando datos previos...");
     await prisma.productImage.deleteMany();
     await prisma.product.deleteMany();
@@ -147,25 +134,37 @@ async function main() {
     console.log("   ✓ BD limpia\n");
   }
 
-  // === 3. Crear o cargar categorías ===
   console.log("📁 Cargando categorías...");
-  const categoryMap = new Map<string, string>(); // nombre → id
+  const categoryMap = new Map<string, string>();
 
   for (const [name, config] of Object.entries(CATEGORY_CONFIG)) {
-    const cat = onlySkus
-      ? await prisma.category.findUnique({ where: { slug: config.slug } })
-      : await prisma.category.create({
-          data: { name, slug: config.slug, description: config.description, order: config.order },
-        });
-    if (!cat) throw new Error(`Categoría "${name}" no encontrada. Corre el seed completo primero.`);
+    const cat =
+      onlySkus || skipUpload
+        ? await prisma.category.upsert({
+            where: { slug: config.slug },
+            update: {},
+            create: {
+              name,
+              slug: config.slug,
+              description: config.description,
+              order: config.order,
+            },
+          })
+        : await prisma.category.create({
+            data: {
+              name,
+              slug: config.slug,
+              description: config.description,
+              order: config.order,
+            },
+          });
     categoryMap.set(name, cat.id);
     console.log(`   ✓ ${name} (${cat.id})`);
   }
   console.log("");
 
-  // === 4. Crear productos + subir fotos ===
-  console.log("📦 Creando productos y subiendo fotos a Cloudinary...");
-  console.log("   (esto puede tardar varios minutos)\n");
+  console.log("📦 Procesando productos...");
+  if (!skipUpload) console.log("   (subiendo fotos a Cloudinary — puede tardar varios minutos)\n");
 
   let success = 0;
   let skipped = 0;
@@ -184,7 +183,9 @@ async function main() {
 
       if (onlySkus && !onlySkus.has(sku)) continue;
 
-      const isActive = row.Activo?.trim().toLowerCase() === "sí" || row.Activo?.trim().toLowerCase() === "si";
+      const isActive =
+        row.Activo?.trim().toLowerCase() === "sí" ||
+        row.Activo?.trim().toLowerCase() === "si";
       const config = CATEGORY_CONFIG[categoryName];
 
       if (!config) {
@@ -192,45 +193,115 @@ async function main() {
         continue;
       }
 
-      // Buscar la foto (soporta .jpg, .jpeg, .png, .webp)
-      const photoFileName = row["Foto principal"]?.trim();
-      const photoPath = findPhotoPath(path.join(FOTOS_DIR, config.folder), photoFileName);
-
-      if (!photoPath) {
-        errors.push(`${sku}: no se encontró la foto "${photoFileName}" en ${path.join(FOTOS_DIR, config.folder)}`);
-        continue;
-      }
-
-      // Subir a Cloudinary
-      process.stdout.write(`   ⏳ ${sku} ${productName.padEnd(40)} subiendo...`);
-      const imageUrl = await uploadImage(photoPath, sku);
-
-      // Crear producto en BD
       const categoryId = categoryMap.get(categoryName)!;
       const slug = slugify(productName) + "-" + sku.toLowerCase();
+      const description =
+        row.Descripción != null
+          ? String(row.Descripción).trim() || productName
+          : productName;
+      const size = (() => {
+        const t =
+          row["Talla / Detalle"] != null
+            ? String(row["Talla / Detalle"]).trim()
+            : null;
+        return !t || t === "—" ? null : t;
+      })();
+      const material =
+        row.Material != null
+          ? String(row.Material).trim() || "Plata 925"
+          : "Plata 925";
+      const stock = row.Stock || 1;
 
-      await prisma.product.create({
-        data: {
-          sku,
-          slug,
-          name: productName,
-          description: row.Descripción != null ? String(row.Descripción).trim() || productName : productName,
-          price: row["Precio (CLP)"],
-          size: (() => { const t = row["Talla / Detalle"] != null ? String(row["Talla / Detalle"]).trim() : null; return !t || t === "—" ? null : t; })(),
-          material: row.Material != null ? String(row.Material).trim() || "Plata 925" : "Plata 925",
-          stock: row.Stock || 1,
-          active: isActive,
-          categoryId,
-          images: {
-            create: {
-              url: imageUrl,
-              alt: productName,
-              order: 0,
-              isPrimary: true,
+      let imageUrl: string;
+
+      if (skipUpload) {
+        imageUrl = cloudinaryUrl(sku);
+        process.stdout.write(
+          `   ⏭️  ${sku} ${productName.padEnd(40)} url Cloudinary...`
+        );
+      } else {
+        const photoFileName = row["Foto principal"]?.trim();
+        const photoPath = findPhotoPath(
+          path.join(FOTOS_DIR, config.folder),
+          photoFileName
+        );
+
+        if (!photoPath) {
+          errors.push(
+            `${sku}: no se encontró la foto "${photoFileName}" en ${path.join(FOTOS_DIR, config.folder)}`
+          );
+          continue;
+        }
+
+        process.stdout.write(
+          `   ⏳ ${sku} ${productName.padEnd(40)} subiendo...`
+        );
+        imageUrl = await uploadImage(photoPath, sku);
+      }
+
+      if (skipUpload || onlySkus) {
+        // Upsert: actualiza si existe, crea si no
+        const saved = await prisma.product.upsert({
+          where: { sku },
+          update: {
+            name: productName,
+            slug,
+            description,
+            price: row["Precio (CLP)"],
+            size,
+            material,
+            stock,
+            active: isActive,
+            categoryId,
+          },
+          create: {
+            sku,
+            slug,
+            name: productName,
+            description,
+            price: row["Precio (CLP)"],
+            size,
+            material,
+            stock,
+            active: isActive,
+            categoryId,
+          },
+        });
+
+        await prisma.productImage.deleteMany({ where: { productId: saved.id } });
+        await prisma.productImage.create({
+          data: {
+            url: imageUrl,
+            alt: productName,
+            order: 0,
+            isPrimary: true,
+            productId: saved.id,
+          },
+        });
+      } else {
+        await prisma.product.create({
+          data: {
+            sku,
+            slug,
+            name: productName,
+            description,
+            price: row["Precio (CLP)"],
+            size,
+            material,
+            stock,
+            active: isActive,
+            categoryId,
+            images: {
+              create: {
+                url: imageUrl,
+                alt: productName,
+                order: 0,
+                isPrimary: true,
+              },
             },
           },
-        },
-      });
+        });
+      }
 
       process.stdout.write(` ✅\n`);
       success++;
@@ -242,13 +313,12 @@ async function main() {
     }
   }
 
-  // === 5. Resumen ===
   console.log("\n" + "=".repeat(60));
   console.log("📊 RESUMEN DEL SEED");
   console.log("=".repeat(60));
-  console.log(`✅ Productos creados:  ${success}`);
-  console.log(`⏭️  Filas omitidas:     ${skipped}`);
-  console.log(`❌ Errores:            ${errors.length}`);
+  console.log(`✅ Productos procesados: ${success}`);
+  console.log(`⏭️  Filas omitidas:       ${skipped}`);
+  console.log(`❌ Errores:              ${errors.length}`);
 
   if (errors.length > 0) {
     console.log("\n⚠️  Detalle de errores:");

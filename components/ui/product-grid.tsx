@@ -10,14 +10,21 @@ type Product = {
 export function ProductGrid({ products }: { products: Product[] }) {
   if (products.length === 0) {
     return (
-      <div className="text-center py-20 text-[var(--zirel-cafe-topo)]">
-        <p className="font-serif italic">No hay productos disponibles en esta categoría.</p>
+      <div className="py-24 flex flex-col items-center gap-6 text-center">
+        <div className="w-12 h-px bg-[var(--zirel-dorado-beige)]/40" />
+        <p className="font-serif italic text-xl text-[var(--zirel-cafe-topo)]">
+          Esta colección está vacía por ahora.
+        </p>
+        <p className="text-xs tracking-[0.25em] uppercase text-[var(--zirel-cafe-topo)]/55">
+          Vuelve pronto — nuevas piezas en camino.
+        </p>
+        <div className="w-12 h-px bg-[var(--zirel-dorado-beige)]/40" />
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12">
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-14">
       {products.map((product) => (
         <ProductCard
           key={product.slug}

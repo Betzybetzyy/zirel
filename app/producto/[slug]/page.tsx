@@ -2,9 +2,12 @@ import { getProductBySlug } from "@/lib/queries";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { AddToCartButton } from "@/components/ui/add-to-cart-button";
+
+function normalizeCloudinaryUrl(url: string, size = 1200): string {
+  if (!url.includes("res.cloudinary.com")) return url;
+  return url.replace("/upload/", `/upload/f_auto,q_auto,w_${size},h_${size},c_pad,b_rgb:FFFFFF/`);
+}
 
 export async function generateMetadata({
   params,
@@ -42,138 +45,250 @@ export default async function ProductPage({
   const mainImage = product.images[0];
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-12">
-      {/* Breadcrumb */}
-      <nav className="text-xs tracking-widest uppercase text-[var(--zirel-cafe-topo)]/70 mb-8">
-        <Link href="/" className="hover:text-[var(--zirel-dorado-beige)]">
-          Inicio
-        </Link>
-        <span className="mx-2">·</span>
-        <Link
-          href="/catalogo"
-          className="hover:text-[var(--zirel-dorado-beige)]"
-        >
-          Catálogo
-        </Link>
-        <span className="mx-2">·</span>
-        <Link
-          href={`/catalogo/${product.category.slug}`}
-          className="hover:text-[var(--zirel-dorado-beige)]"
-        >
-          {product.category.name}
-        </Link>
-        <span className="mx-2">·</span>
-        <span className="text-[var(--zirel-negro-suave)]">{product.name}</span>
-      </nav>
+    <>
+      {/* HEADER con breadcrumb */}
+      <section className="relative flex flex-col items-center justify-center pt-28 pb-16 px-6 text-center overflow-hidden">
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(ellipse 65% 70% at 50% 44%, var(--zirel-beige-suave) 0%, transparent 70%)",
+          }}
+        />
 
-      <div className="grid md:grid-cols-2 gap-12 lg:gap-20">
-        {/* Galería de imágenes */}
-        <div>
-          <div className="aspect-square bg-[var(--zirel-beige-suave)] p-2">
-            <div className="relative w-full h-full bg-white">
-              {mainImage ? (
-                <Image
-                  src={mainImage.url}
-                  alt={mainImage.alt || product.name}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  className="object-contain p-8"
-                  priority
-                />
-              ) : (
-                <div className="flex items-center justify-center h-full text-[var(--zirel-cafe-topo)]/40">
-                  Sin imagen
-                </div>
-              )}
-            </div>
-          </div>
+        {/* Corner brackets */}
+        <div className="absolute top-10 left-10 w-10 h-10 border-t border-l border-[var(--zirel-dorado-beige)]/35 pointer-events-none hidden md:block" />
+        <div className="absolute top-10 right-10 w-10 h-10 border-t border-r border-[var(--zirel-dorado-beige)]/35 pointer-events-none hidden md:block" />
+        <div className="absolute bottom-8 left-10 w-10 h-10 border-b border-l border-[var(--zirel-dorado-beige)]/35 pointer-events-none hidden md:block" />
+        <div className="absolute bottom-8 right-10 w-10 h-10 border-b border-r border-[var(--zirel-dorado-beige)]/35 pointer-events-none hidden md:block" />
 
-          {/* Galería extra si hay más fotos */}
-          {product.images.length > 1 && (
-            <div className="grid grid-cols-4 gap-2 mt-2">
-              {product.images.map((img) => (
-                <div
-                  key={img.id}
-                  className="relative aspect-square overflow-hidden bg-[var(--zirel-beige-suave)]"
-                >
-                  <Image
-                    src={img.url}
-                    alt={img.alt || product.name}
-                    fill
-                    sizes="20vw"
-                    className="object-cover"
-                  />
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <div className="relative z-10 flex flex-col items-center">
+          {/* Breadcrumb */}
+          <nav className="text-[9px] tracking-[0.35em] uppercase text-[var(--zirel-cafe-topo)]/60 mb-8 flex items-center gap-2">
+            <Link href="/" className="hover:text-[var(--zirel-dorado-beige)] transition-colors duration-200">
+              Inicio
+            </Link>
+            <span className="text-[var(--zirel-dorado-beige)]/40">·</span>
+            <Link href="/catalogo" className="hover:text-[var(--zirel-dorado-beige)] transition-colors duration-200">
+              Catálogo
+            </Link>
+            <span className="text-[var(--zirel-dorado-beige)]/40">·</span>
+            <Link
+              href={`/catalogo/${product.category.slug}`}
+              className="hover:text-[var(--zirel-dorado-beige)] transition-colors duration-200"
+            >
+              {product.category.name}
+            </Link>
+            <span className="text-[var(--zirel-dorado-beige)]/40">·</span>
+            <span className="text-[var(--zirel-negro-suave)]">{product.name}</span>
+          </nav>
 
-        {/* Información del producto */}
-        <div className="flex flex-col">
-          <p className="text-xs tracking-[0.3em] uppercase text-[var(--zirel-cafe-topo)] mb-3">
-            {product.category.name}
-          </p>
-
-          <h1 className="font-serif text-4xl md:text-5xl text-[var(--zirel-negro-suave)] leading-tight mb-6">
+          <span className="text-[var(--zirel-dorado-beige)] text-[10px] tracking-[0.35em] uppercase block mb-5">
+            ✦ {product.category.name}
+          </span>
+          <h1 className="font-serif text-4xl md:text-5xl text-[var(--zirel-negro-suave)] mb-5 max-w-xl leading-tight">
             {product.name}
           </h1>
-
-          <p className="text-2xl tracking-wide text-[var(--zirel-negro-suave)] mb-8">
+          <div className="w-16 h-px bg-[var(--zirel-dorado-beige)] mb-5" />
+          <p className="text-xl tracking-wide text-[var(--zirel-cafe-topo)] font-variant-numeric tabular-nums">
             {formattedPrice}
           </p>
+        </div>
+      </section>
 
-          <Separator className="bg-[var(--zirel-arena)]/50 mb-8" />
+      {/* DARK STRIP — detalles rápidos */}
+      <div className="bg-[var(--zirel-negro-suave)] py-5">
+        <div className="mx-auto max-w-7xl px-6">
+          <ul className="grid grid-cols-2 md:grid-cols-4 gap-y-4 gap-x-0 md:divide-x md:divide-[var(--zirel-marfil)]/10">
+            {[
+              { label: product.material, sub: "Material" },
+              { label: "Plata 925", sub: "Certificada" },
+              { label: "Envío a Chile", sub: "Todo el país" },
+              { label: "Pieza única", sub: "Seleccionada para ti" },
+            ].map((item) => (
+              <li
+                key={item.sub}
+                className="flex flex-col items-center text-center md:px-8 gap-0.5"
+              >
+                <span className="text-[var(--zirel-dorado-beige)] text-xs tracking-[0.2em] uppercase font-medium">
+                  {item.label}
+                </span>
+                <span className="text-[var(--zirel-marfil)]/35 text-[11px]">
+                  {item.sub}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
 
-          {/* Descripción */}
-          <div className="mb-8">
-            <h2 className="text-xs tracking-widest uppercase text-[var(--zirel-cafe-topo)] mb-3">
-              Descripción
-            </h2>
-            <p className="font-serif text-[var(--zirel-negro-suave)] leading-relaxed">
-              {product.description}
+      {/* MAIN CONTENT */}
+      <section className="mx-auto max-w-7xl px-6 py-16 md:py-24">
+        <div className="grid md:grid-cols-2 gap-12 lg:gap-20 items-start">
+
+          {/* GALERÍA */}
+          <div>
+            {/* Imagen principal con frame editorial */}
+            <div className="relative">
+              {/* Corner accent brackets */}
+              <div className="absolute -top-3 -left-3 w-8 h-8 border-t-2 border-l-2 border-[var(--zirel-dorado-beige)]/50 pointer-events-none z-10" />
+              <div className="absolute -top-3 -right-3 w-8 h-8 border-t-2 border-r-2 border-[var(--zirel-dorado-beige)]/50 pointer-events-none z-10" />
+              <div className="absolute -bottom-3 -left-3 w-8 h-8 border-b-2 border-l-2 border-[var(--zirel-dorado-beige)]/50 pointer-events-none z-10" />
+              <div className="absolute -bottom-3 -right-3 w-8 h-8 border-b-2 border-r-2 border-[var(--zirel-dorado-beige)]/50 pointer-events-none z-10" />
+
+              <div className="relative aspect-square bg-[var(--zirel-marfil)] overflow-hidden">
+                {mainImage ? (
+                  <Image
+                    src={normalizeCloudinaryUrl(mainImage.url, 1200)}
+                    alt={mainImage.alt || product.name}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    className="object-contain"
+                    style={{ mixBlendMode: "multiply" }}
+                    priority
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full text-[var(--zirel-cafe-topo)]/40 font-serif italic text-sm">
+                    Sin imagen
+                  </div>
+                )}
+                {/* Uniform inner border */}
+                <div className="absolute inset-0 shadow-[inset_0_0_0_1px_rgba(43,38,35,0.08)] pointer-events-none" />
+              </div>
+            </div>
+
+            {/* Thumbnails */}
+            {product.images.length > 1 && (
+              <div className="grid grid-cols-4 gap-2 mt-3">
+                {product.images.map((img, i) => (
+                  <div
+                    key={img.id}
+                    className={`relative aspect-square overflow-hidden bg-[var(--zirel-marfil)] transition-all duration-200 ${
+                      i === 0
+                        ? "shadow-[inset_0_0_0_1.5px_var(--zirel-dorado-beige)]"
+                        : "shadow-[inset_0_0_0_1px_rgba(43,38,35,0.08)] hover:shadow-[inset_0_0_0_1.5px_var(--zirel-dorado-beige)]"
+                    }`}
+                  >
+                    <Image
+                      src={normalizeCloudinaryUrl(img.url, 300)}
+                      alt={img.alt || product.name}
+                      fill
+                      sizes="15vw"
+                      className="object-contain"
+                      style={{ mixBlendMode: "multiply" }}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* SKU debajo de imagen */}
+            <p className="text-[9px] tracking-[0.35em] uppercase text-[var(--zirel-cafe-topo)]/35 mt-5 text-center">
+              Ref. {product.sku}
             </p>
           </div>
 
-          {/* Detalles */}
-          <div className="space-y-3 mb-10">
-            <h2 className="text-xs tracking-widest uppercase text-[var(--zirel-cafe-topo)] mb-3">
-              Detalles
-            </h2>
-            <div className="grid grid-cols-2 gap-y-2 text-sm">
-              <span className="text-[var(--zirel-cafe-topo)]">Material</span>
-              <span className="text-[var(--zirel-negro-suave)]">
-                {product.material}
-              </span>
+          {/* INFO DEL PRODUCTO — sticky en desktop */}
+          <div className="flex flex-col md:sticky md:top-32">
 
-              {product.size && (
-                <>
-                  <span className="text-[var(--zirel-cafe-topo)]">
-                    Talla / Detalle
-                  </span>
-                  <span className="text-[var(--zirel-negro-suave)]">
-                    {product.size}
-                  </span>
-                </>
-              )}
+            {/* Descripción */}
+            <div className="mb-10">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="text-[var(--zirel-dorado-beige)] text-[10px] tracking-[0.35em] uppercase">
+                  ✦ Descripción
+                </span>
+                <div className="flex-1 h-px bg-[var(--zirel-arena)]/50" />
+              </div>
+              <p className="font-serif text-[var(--zirel-negro-suave)] leading-relaxed text-[15px]">
+                {product.description}
+              </p>
+            </div>
 
-              <span className="text-[var(--zirel-cafe-topo)]">SKU</span>
-              <span className="text-[var(--zirel-negro-suave)] font-mono text-xs">
-                {product.sku}
-              </span>
+            {/* Detalles */}
+            <div className="mb-10">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="text-[var(--zirel-dorado-beige)] text-[10px] tracking-[0.35em] uppercase">
+                  ✦ Detalles
+                </span>
+                <div className="flex-1 h-px bg-[var(--zirel-arena)]/50" />
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex justify-between items-baseline py-2.5 border-b border-[var(--zirel-arena)]/30">
+                  <span className="text-[11px] tracking-[0.2em] uppercase text-[var(--zirel-cafe-topo)]/70">
+                    Material
+                  </span>
+                  <span className="font-serif text-[var(--zirel-negro-suave)] text-sm">
+                    {product.material}
+                  </span>
+                </div>
+
+                {product.size && (
+                  <div className="flex justify-between items-baseline py-2.5 border-b border-[var(--zirel-arena)]/30">
+                    <span className="text-[11px] tracking-[0.2em] uppercase text-[var(--zirel-cafe-topo)]/70">
+                      Talla / Detalle
+                    </span>
+                    <span className="font-serif text-[var(--zirel-negro-suave)] text-sm">
+                      {product.size}
+                    </span>
+                  </div>
+                )}
+
+                <div className="flex justify-between items-baseline py-2.5">
+                  <span className="text-[11px] tracking-[0.2em] uppercase text-[var(--zirel-cafe-topo)]/70">
+                    SKU
+                  </span>
+                  <span className="font-mono text-[11px] text-[var(--zirel-cafe-topo)]/60">
+                    {product.sku}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Precio + CTA */}
+            <div className="border-t border-[var(--zirel-arena)]/50 pt-8">
+              <div className="flex items-baseline justify-between mb-6">
+                <span className="text-[10px] tracking-[0.3em] uppercase text-[var(--zirel-cafe-topo)]/60">
+                  Precio
+                </span>
+                <span className="font-serif text-3xl text-[var(--zirel-negro-suave)] tracking-tight font-variant-numeric tabular-nums">
+                  {formattedPrice}
+                </span>
+              </div>
+
+              <AddToCartButton
+                productId={product.id}
+                sku={product.sku}
+                slug={product.slug}
+                name={product.name}
+                price={product.price}
+                imageUrl={mainImage?.url}
+              />
+
+              <Link
+                href="/catalogo"
+                className="block text-center mt-4 text-[11px] tracking-[0.25em] uppercase text-[var(--zirel-cafe-topo)]/55 hover:text-[var(--zirel-dorado-beige)] transition-colors duration-200"
+              >
+                ← Volver al catálogo
+              </Link>
             </div>
           </div>
-
-          <AddToCartButton
-            productId={product.id}
-            sku={product.sku}
-            slug={product.slug}
-            name={product.name}
-            price={product.price}
-            imageUrl={mainImage?.url}
-          />
         </div>
-      </div>
-    </div>
+      </section>
+
+      {/* MANIFESTO */}
+      <section className="bg-[var(--zirel-negro-suave)] py-24 px-6">
+        <div className="mx-auto max-w-2xl text-center">
+          <div className="w-14 h-px bg-[var(--zirel-dorado-beige)]/35 mx-auto mb-10" />
+          <blockquote className="font-serif text-2xl md:text-3xl text-[var(--zirel-marfil)] leading-snug italic">
+            "Cada joya nace con la intención de acompañarte en los momentos que importan."
+          </blockquote>
+          <div className="w-14 h-px bg-[var(--zirel-dorado-beige)]/35 mx-auto mt-10 mb-7" />
+          <span className="text-[var(--zirel-dorado-beige)] text-[10px] tracking-[0.4em] uppercase">
+            Zirel Joyería · Oro & Plata
+          </span>
+        </div>
+      </section>
+    </>
   );
 }

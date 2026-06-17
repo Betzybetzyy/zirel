@@ -9,7 +9,11 @@
     "db:generate": "prisma generate",
     "start": "next start",
     "lint": "eslint",
-    "db:seed": "dotenv -e .env -- tsx scripts/seed.ts"
+    "db:seed": "dotenv -e .env -- tsx scripts/seed.ts",
+    "db:migrate:create": "dotenv -e .env -e .env.docker -- prisma migrate dev --name init",
+    "db:migrate:docker": "dotenv -e .env -e .env.docker -- prisma migrate deploy",
+    "db:seed:docker": "dotenv -e .env -e .env.docker -- tsx scripts/seed.ts --skip-upload",
+    "db:setup:docker": "npm run db:migrate:docker && npm run db:seed:docker"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",

@@ -133,6 +133,8 @@ export default function CheckoutPage() {
             <Input
               id="customerName"
               required
+              minLength={2}
+              maxLength={100}
               value={form.customerName}
               onChange={(e) => handleChange("customerName", e.target.value)}
               className="rounded-none mt-2"
@@ -146,6 +148,7 @@ export default function CheckoutPage() {
                 id="customerEmail"
                 type="email"
                 required
+                maxLength={254}
                 value={form.customerEmail}
                 onChange={(e) => handleChange("customerEmail", e.target.value)}
                 className="rounded-none mt-2"
@@ -156,6 +159,8 @@ export default function CheckoutPage() {
               <Input
                 id="customerPhone"
                 required
+                minLength={8}
+                maxLength={20}
                 placeholder="+56 9 ..."
                 value={form.customerPhone}
                 onChange={(e) => handleChange("customerPhone", e.target.value)}
@@ -172,6 +177,7 @@ export default function CheckoutPage() {
             <Label htmlFor="customerAddress">Dirección</Label>
             <Input
               id="customerAddress"
+              maxLength={200}
               placeholder="Calle, número, depto."
               value={form.customerAddress}
               onChange={(e) => handleChange("customerAddress", e.target.value)}
@@ -183,6 +189,7 @@ export default function CheckoutPage() {
             <Label htmlFor="customerComuna">Comuna</Label>
             <Input
               id="customerComuna"
+              maxLength={100}
               value={form.customerComuna}
               onChange={(e) => handleChange("customerComuna", e.target.value)}
               className="rounded-none mt-2"
@@ -193,6 +200,7 @@ export default function CheckoutPage() {
             <Label htmlFor="customerNotes">Comentarios (opcional)</Label>
             <Textarea
               id="customerNotes"
+              maxLength={500}
               placeholder="¿Alguna preferencia o instrucción especial?"
               value={form.customerNotes}
               onChange={(e) => handleChange("customerNotes", e.target.value)}
