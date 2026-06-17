@@ -47,24 +47,9 @@ export default async function ProductPage({
   return (
     <>
       {/* HEADER con breadcrumb */}
-      <section className="relative flex flex-col items-center justify-center pt-28 pb-16 px-6 text-center overflow-hidden">
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(ellipse 65% 70% at 50% 44%, var(--zirel-beige-suave) 0%, transparent 70%)",
-          }}
-        />
-
-        {/* Corner brackets */}
-        <div className="absolute top-10 left-10 w-10 h-10 border-t border-l border-[var(--zirel-dorado-beige)]/35 pointer-events-none hidden md:block" />
-        <div className="absolute top-10 right-10 w-10 h-10 border-t border-r border-[var(--zirel-dorado-beige)]/35 pointer-events-none hidden md:block" />
-        <div className="absolute bottom-8 left-10 w-10 h-10 border-b border-l border-[var(--zirel-dorado-beige)]/35 pointer-events-none hidden md:block" />
-        <div className="absolute bottom-8 right-10 w-10 h-10 border-b border-r border-[var(--zirel-dorado-beige)]/35 pointer-events-none hidden md:block" />
-
-        <div className="relative z-10 flex flex-col items-center">
-          {/* Breadcrumb */}
-          <nav className="text-[9px] tracking-[0.35em] uppercase text-[var(--zirel-cafe-topo)]/60 mb-8 flex items-center gap-2">
+      <section className="pt-24 pb-6 px-6">
+        <div className="mx-auto max-w-7xl">
+          <nav className="text-[9px] tracking-[0.35em] uppercase text-[var(--zirel-cafe-topo)]/60 flex items-center gap-2">
             <Link href="/" className="hover:text-[var(--zirel-dorado-beige)] transition-colors duration-200">
               Inicio
             </Link>
@@ -82,45 +67,8 @@ export default async function ProductPage({
             <span className="text-[var(--zirel-dorado-beige)]/40">·</span>
             <span className="text-[var(--zirel-negro-suave)]">{product.name}</span>
           </nav>
-
-          <span className="text-[var(--zirel-dorado-beige)] text-[10px] tracking-[0.35em] uppercase block mb-5">
-            ✦ {product.category.name}
-          </span>
-          <h1 className="font-serif text-4xl md:text-5xl text-[var(--zirel-negro-suave)] mb-5 max-w-xl leading-tight">
-            {product.name}
-          </h1>
-          <div className="w-16 h-px bg-[var(--zirel-dorado-beige)] mb-5" />
-          <p className="text-xl tracking-wide text-[var(--zirel-cafe-topo)] font-variant-numeric tabular-nums">
-            {formattedPrice}
-          </p>
         </div>
       </section>
-
-      {/* DARK STRIP — detalles rápidos */}
-      <div className="bg-[var(--zirel-negro-suave)] py-5">
-        <div className="mx-auto max-w-7xl px-6">
-          <ul className="grid grid-cols-2 md:grid-cols-4 gap-y-4 gap-x-0 md:divide-x md:divide-[var(--zirel-marfil)]/10">
-            {[
-              { label: product.material, sub: "Material" },
-              { label: "Plata 925", sub: "Certificada" },
-              { label: "Envío a Chile", sub: "Todo el país" },
-              { label: "Pieza única", sub: "Seleccionada para ti" },
-            ].map((item) => (
-              <li
-                key={item.sub}
-                className="flex flex-col items-center text-center md:px-8 gap-0.5"
-              >
-                <span className="text-[var(--zirel-dorado-beige)] text-xs tracking-[0.2em] uppercase font-medium">
-                  {item.label}
-                </span>
-                <span className="text-[var(--zirel-marfil)]/35 text-[11px]">
-                  {item.sub}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
 
       {/* MAIN CONTENT */}
       <section className="mx-auto max-w-7xl px-6 py-16 md:py-24">
@@ -144,8 +92,7 @@ export default async function ProductPage({
                     fill
                     sizes="(max-width: 768px) 100vw, 50vw"
                     className="object-contain"
-                    style={{ mixBlendMode: "multiply" }}
-                    priority
+                                        priority
                   />
                 ) : (
                   <div className="flex items-center justify-center h-full text-[var(--zirel-cafe-topo)]/40 font-serif italic text-sm">
@@ -175,8 +122,7 @@ export default async function ProductPage({
                       fill
                       sizes="15vw"
                       className="object-contain"
-                      style={{ mixBlendMode: "multiply" }}
-                    />
+                                          />
                   </div>
                 ))}
               </div>
@@ -190,6 +136,17 @@ export default async function ProductPage({
 
           {/* INFO DEL PRODUCTO — sticky en desktop */}
           <div className="flex flex-col md:sticky md:top-32">
+
+            {/* Título */}
+            <div className="mb-10">
+              <span className="text-[var(--zirel-dorado-beige)] text-[10px] tracking-[0.35em] uppercase block mb-4">
+                ✦ {product.category.name}
+              </span>
+              <h1 className="font-serif text-3xl md:text-4xl text-[var(--zirel-negro-suave)] mb-5 leading-tight">
+                {product.name}
+              </h1>
+              <div className="w-12 h-px bg-[var(--zirel-dorado-beige)]" />
+            </div>
 
             {/* Descripción */}
             <div className="mb-10">
@@ -265,16 +222,39 @@ export default async function ProductPage({
                 imageUrl={mainImage?.url}
               />
 
-              <Link
-                href="/catalogo"
-                className="block text-center mt-4 text-[11px] tracking-[0.25em] uppercase text-[var(--zirel-cafe-topo)]/55 hover:text-[var(--zirel-dorado-beige)] transition-colors duration-200"
-              >
-                ← Volver al catálogo
-              </Link>
+              <div className="mt-8 pt-6 border-t border-[var(--zirel-arena)]/30">
+                <Link
+                  href="/catalogo"
+                  className="block text-center text-[11px] tracking-[0.25em] uppercase text-[var(--zirel-cafe-topo)]/50 hover:text-[var(--zirel-dorado-beige)] transition-colors duration-200"
+                >
+                  ← Volver al catálogo
+                </Link>
+              </div>
             </div>
           </div>
         </div>
       </section>
+
+      {/* TRUST STRIP */}
+      <div className="border-t border-[var(--zirel-arena)]/40 bg-[var(--zirel-marfil)]/60 py-7 px-6">
+        <ul className="mx-auto max-w-7xl grid grid-cols-2 md:grid-cols-4 gap-y-5 gap-x-0 md:divide-x md:divide-[var(--zirel-arena)]/40">
+          {[
+            { label: product.material, sub: "Material" },
+            { label: "Plata 925", sub: "Certificada" },
+            { label: "Envío a Chile", sub: "Todo el país" },
+            { label: "Pieza única", sub: "Seleccionada para ti" },
+          ].map((item) => (
+            <li key={item.sub} className="flex flex-col items-center text-center md:px-8 gap-1">
+              <span className="text-[var(--zirel-cafe-topo)] text-[10px] tracking-[0.25em] uppercase font-medium">
+                {item.label}
+              </span>
+              <span className="text-[var(--zirel-cafe-topo)]/40 text-[10px]">
+                {item.sub}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
 
       {/* MANIFESTO */}
       <section className="bg-[var(--zirel-negro-suave)] py-24 px-6">

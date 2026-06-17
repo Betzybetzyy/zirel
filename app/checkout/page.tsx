@@ -14,7 +14,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, ArrowLeft } from "lucide-react";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -121,15 +121,28 @@ export default function CheckoutPage() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="grid lg:grid-cols-2 gap-12">
+      <form onSubmit={handleSubmit} className="grid lg:grid-cols-5 gap-12 lg:gap-16">
         {/* Formulario */}
-        <div className="space-y-6">
+        <div className="lg:col-span-3 space-y-6">
+          <Link
+            href="/carrito"
+            className="inline-flex items-center gap-2 text-xs tracking-wider text-[var(--zirel-cafe-topo)] hover:text-[var(--zirel-negro-suave)] transition-colors duration-200 mb-2"
+          >
+            <ArrowLeft className="h-3 w-3" />
+            Volver al carrito
+          </Link>
+
           <h2 className="font-serif text-2xl text-[var(--zirel-negro-suave)] border-b border-[var(--zirel-arena)]/40 pb-3">
             Datos de contacto
           </h2>
 
           <div>
-            <Label htmlFor="customerName">Nombre completo *</Label>
+            <Label
+              htmlFor="customerName"
+              className="text-[10px] tracking-widest uppercase text-[var(--zirel-cafe-topo)]"
+            >
+              Nombre completo *
+            </Label>
             <Input
               id="customerName"
               required
@@ -137,13 +150,18 @@ export default function CheckoutPage() {
               maxLength={100}
               value={form.customerName}
               onChange={(e) => handleChange("customerName", e.target.value)}
-              className="rounded-none mt-2"
+              className="rounded-none mt-2 px-3 border-[var(--zirel-arena)] focus-visible:ring-[var(--zirel-dorado-beige)]"
             />
           </div>
 
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="customerEmail">Email *</Label>
+              <Label
+                htmlFor="customerEmail"
+                className="text-[10px] tracking-widest uppercase text-[var(--zirel-cafe-topo)]"
+              >
+                Email *
+              </Label>
               <Input
                 id="customerEmail"
                 type="email"
@@ -151,11 +169,16 @@ export default function CheckoutPage() {
                 maxLength={254}
                 value={form.customerEmail}
                 onChange={(e) => handleChange("customerEmail", e.target.value)}
-                className="rounded-none mt-2"
+                className="rounded-none mt-2 px-3 border-[var(--zirel-arena)] focus-visible:ring-[var(--zirel-dorado-beige)]"
               />
             </div>
             <div>
-              <Label htmlFor="customerPhone">Teléfono *</Label>
+              <Label
+                htmlFor="customerPhone"
+                className="text-[10px] tracking-widest uppercase text-[var(--zirel-cafe-topo)]"
+              >
+                Teléfono *
+              </Label>
               <Input
                 id="customerPhone"
                 required
@@ -164,7 +187,7 @@ export default function CheckoutPage() {
                 placeholder="+56 9 ..."
                 value={form.customerPhone}
                 onChange={(e) => handleChange("customerPhone", e.target.value)}
-                className="rounded-none mt-2"
+                className="rounded-none mt-2 px-3 border-[var(--zirel-arena)] focus-visible:ring-[var(--zirel-dorado-beige)]"
               />
             </div>
           </div>
@@ -174,99 +197,116 @@ export default function CheckoutPage() {
           </h2>
 
           <div>
-            <Label htmlFor="customerAddress">Dirección</Label>
+            <Label
+              htmlFor="customerAddress"
+              className="text-[10px] tracking-widest uppercase text-[var(--zirel-cafe-topo)]"
+            >
+              Dirección
+            </Label>
             <Input
               id="customerAddress"
               maxLength={200}
               placeholder="Calle, número, depto."
               value={form.customerAddress}
               onChange={(e) => handleChange("customerAddress", e.target.value)}
-              className="rounded-none mt-2"
+              className="rounded-none mt-2 px-3 border-[var(--zirel-arena)] focus-visible:ring-[var(--zirel-dorado-beige)]"
             />
           </div>
 
           <div>
-            <Label htmlFor="customerComuna">Comuna</Label>
+            <Label
+              htmlFor="customerComuna"
+              className="text-[10px] tracking-widest uppercase text-[var(--zirel-cafe-topo)]"
+            >
+              Comuna
+            </Label>
             <Input
               id="customerComuna"
               maxLength={100}
               value={form.customerComuna}
               onChange={(e) => handleChange("customerComuna", e.target.value)}
-              className="rounded-none mt-2"
+              className="rounded-none mt-2 px-3 border-[var(--zirel-arena)] focus-visible:ring-[var(--zirel-dorado-beige)]"
             />
           </div>
 
           <div>
-            <Label htmlFor="customerNotes">Comentarios (opcional)</Label>
+            <Label
+              htmlFor="customerNotes"
+              className="text-[10px] tracking-widest uppercase text-[var(--zirel-cafe-topo)]"
+            >
+              Comentarios (opcional)
+            </Label>
             <Textarea
               id="customerNotes"
               maxLength={500}
               placeholder="¿Alguna preferencia o instrucción especial?"
               value={form.customerNotes}
               onChange={(e) => handleChange("customerNotes", e.target.value)}
-              className="rounded-none mt-2 min-h-24"
+              className="rounded-none mt-2 px-3 border-[var(--zirel-arena)] focus-visible:ring-[var(--zirel-dorado-beige)]"
             />
           </div>
         </div>
 
         {/* Resumen */}
-        <div>
-          <div className="bg-[var(--zirel-beige-suave)]/30 p-8 lg:sticky lg:top-28">
-            <h2 className="font-serif text-2xl text-[var(--zirel-negro-suave)] mb-6">
+        <div className="lg:col-span-2">
+          <div className="bg-[var(--zirel-beige-suave)]/60 border border-[var(--zirel-arena)]/50 p-8 lg:sticky lg:top-28">
+            <h2 className="font-serif text-xl text-[var(--zirel-negro-suave)] mb-6 tracking-wide">
               Tu pedido
             </h2>
 
             <div className="space-y-4 mb-6">
               {items.map((item) => (
-                <div key={item.productId} className="flex gap-3 items-center">
-                  <div className="relative w-14 h-14 bg-[var(--zirel-marfil)] flex-shrink-0">
-                    {item.imageUrl && (
-                      <Image
-                        src={item.imageUrl}
-                        alt={item.name}
-                        fill
-                        sizes="56px"
-                        className="object-cover"
-                      />
-                    )}
-                    <span className="absolute -top-1 -right-1 bg-[var(--zirel-negro-suave)] text-[var(--zirel-marfil)] text-[10px] font-medium w-5 h-5 rounded-full flex items-center justify-center">
+                <div key={item.productId} className="flex gap-4 items-center">
+                  <div className="relative flex-shrink-0 w-16 h-16 bg-[var(--zirel-beige-suave)]">
+                    <div className="absolute inset-1.5 bg-white overflow-hidden">
+                      {item.imageUrl && (
+                        <Image
+                          src={item.imageUrl}
+                          alt={item.name}
+                          fill
+                          sizes="64px"
+                          className="object-contain p-0.5"
+                        />
+                      )}
+                    </div>
+                    <span className="absolute -top-1 -right-1 bg-[var(--zirel-negro-suave)] text-[var(--zirel-marfil)] text-[10px] font-medium w-5 h-5 rounded-full flex items-center justify-center z-10">
                       {item.quantity}
                     </span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-[var(--zirel-negro-suave)] line-clamp-1">
+                    <p className="text-sm text-[var(--zirel-negro-suave)] line-clamp-1 font-serif leading-snug">
                       {item.name}
                     </p>
-                    <p className="text-xs text-[var(--zirel-cafe-topo)]">
-                      {formatCLP(item.price)}
+                    <p className="text-[11px] text-[var(--zirel-cafe-topo)]/70 mt-0.5">
+                      {formatCLP(item.price)} c/u
                     </p>
                   </div>
-                  <span className="text-sm tabular-nums">
+                  <span className="text-sm tabular-nums text-[var(--zirel-negro-suave)]">
                     {formatCLP(item.price * item.quantity)}
                   </span>
                 </div>
               ))}
             </div>
 
-            <Separator className="bg-[var(--zirel-arena)]/50 mb-4" />
+            <Separator className="bg-[var(--zirel-arena)]/60 mb-4" />
 
-            <div className="space-y-2 text-sm mb-4">
+            <div className="space-y-3 text-sm mb-4">
               <div className="flex justify-between">
                 <span className="text-[var(--zirel-cafe-topo)]">Subtotal</span>
-                <span>{formatCLP(subtotal)}</span>
+                <span className="text-[var(--zirel-negro-suave)] tabular-nums">{formatCLP(subtotal)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-[var(--zirel-cafe-topo)]">Despacho</span>
-                <span className="text-[var(--zirel-cafe-topo)] italic text-xs">
+                <span className="text-[var(--zirel-cafe-topo)]/70 italic text-xs">
                   Por coordinar
                 </span>
               </div>
             </div>
 
-            <Separator className="bg-[var(--zirel-arena)]/50 mb-4" />
+            <Separator className="bg-[var(--zirel-arena)]/60 mb-6" />
 
-            <div className="flex justify-between items-baseline mb-6">
-              <span className="text-xs tracking-widest uppercase text-[var(--zirel-cafe-topo)]">
+            <div className="flex justify-between items-baseline mb-8">
+              <span className="text-[10px] tracking-widest uppercase text-[var(--zirel-cafe-topo)]">
                 Total
               </span>
               <span className="font-serif text-3xl text-[var(--zirel-negro-suave)] tabular-nums">
@@ -277,7 +317,7 @@ export default function CheckoutPage() {
             <Button
               type="submit"
               size="lg"
-              className="w-full rounded-none"
+              className="w-full rounded-none bg-[var(--zirel-negro-suave)] text-[var(--zirel-marfil)] hover:bg-[var(--zirel-cafe-topo)] active:scale-[0.99] transition-all duration-200"
               disabled={submitting}
             >
               {submitting ? (
@@ -290,7 +330,7 @@ export default function CheckoutPage() {
               )}
             </Button>
 
-            <p className="text-xs text-[var(--zirel-cafe-topo)]/70 italic text-center mt-4">
+            <p className="text-[11px] text-[var(--zirel-cafe-topo)]/60 italic text-center mt-5 leading-relaxed">
               ✦ Te abriremos WhatsApp con el resumen del pedido.
             </p>
           </div>

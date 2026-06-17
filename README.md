@@ -34,7 +34,63 @@ NEXT_PUBLIC_WHATSAPP_NUMBER=
 
 ## Instalación y setup
 
-### 1. Instalar dependencias
+### Opción A — Docker (recomendado para desarrollo local)
+
+Solo necesitas Docker instalado. No se requiere PostgreSQL local ni cuenta Neon.
+
+**1. Levantar la base de datos**
+
+```bash
+docker compose up db -d
+```
+
+Esto expone PostgreSQL en `localhost:5433`.
+
+**2. Configurar `.env`**
+
+```env
+DATABASE_URL=postgresql://zirel:zirel@localhost:5433/zirel
+# resto de variables (Cloudinary, WhatsApp)...
+```
+
+**3. Instalar dependencias y sincronizar schema**
+
+```bash
+npm install
+npx prisma db push
+```
+
+**4. (Opcional) Seed de productos**
+
+```bash
+npm run db:seed
+```
+
+**5. Iniciar servidor de desarrollo**
+
+```bash
+npm run dev
+```
+
+Abre [http://localhost:3000](http://localhost:3000).
+
+---
+
+### Opción B — Stack completo en Docker
+
+Levanta la BD y la app en producción dentro de contenedores:
+
+```bash
+docker compose --profile full up --build
+```
+
+Abre [http://localhost:3000](http://localhost:3000). La app corre en modo producción (`NODE_ENV=production`).
+
+---
+
+### Opción C — Sin Docker (Neon cloud)
+
+**1. Instalar dependencias**
 
 ```bash
 npm install
@@ -42,13 +98,13 @@ npm install
 
 Esto también ejecuta `prisma generate` automáticamente via `postinstall`.
 
-### 2. Sincronizar schema con la base de datos
+**2. Sincronizar schema con la base de datos**
 
 ```bash
 npx prisma db push
 ```
 
-### 3. (Opcional) Seed de productos
+**3. (Opcional) Seed de productos**
 
 Requiere el archivo `seed-data/inventario.xlsx` y fotos en `seed-data/fotos/` organizadas por categoría (`anillos/`, `aros/`, `pulseras/`, `collares/`).
 
