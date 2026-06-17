@@ -20,6 +20,14 @@ const nunito = Nunito_Sans({
 export const metadata: Metadata = {
   title: "Zirel Joyería",
   description: "Joyería en plata 925. Lujo sutil, sofisticación y delicadeza.",
+  openGraph: {
+    title: "Zirel Joyería",
+    description: "Joyería en plata 925. Lujo sutil, sofisticación y delicadeza.",
+    siteName: "Zirel Joyería",
+    locale: "es_CL",
+    type: "website",
+    images: [{ url: "/logo.png", width: 1100, height: 505, alt: "Zirel Joyería" }],
+  },
 };
 
 export default function RootLayout({

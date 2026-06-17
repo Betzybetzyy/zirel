@@ -19,7 +19,7 @@ export function ProductCard({ slug, name, price, imageUrl, imageAlt }: ProductCa
   return (
     <Link
       href={`/producto/${slug}`}
-      className="group block"
+      className="group block transition-transform duration-300 hover:-translate-y-0.5"
     >
       {/* Imagen */}
       <div className="aspect-square bg-[var(--zirel-beige-suave)] mb-4 p-2">

@@ -4,6 +4,7 @@ import { getCategories } from "@/lib/queries";
 import { CartButton } from "./cart-button";
 import { CartDrawer } from "./cart-drawer";
 import { MobileMenu } from "./mobile-menu";
+import { NavLinks } from "./nav-links";
 
 export async function Header() {
   const categories = await getCategories();
@@ -26,23 +27,7 @@ export async function Header() {
             </Link>
 
             {/* Navegación desktop */}
-            <nav className="hidden md:flex items-center gap-10">
-              <Link
-                href="/catalogo"
-                className="text-sm tracking-widest uppercase text-[var(--zirel-negro-suave)] hover:text-[var(--zirel-dorado-beige)] transition-colors"
-              >
-                Catálogo
-              </Link>
-              {categories.map((cat) => (
-                <Link
-                  key={cat.id}
-                  href={`/catalogo/${cat.slug}`}
-                  className="text-sm tracking-widest uppercase text-[var(--zirel-cafe-topo)] hover:text-[var(--zirel-dorado-beige)] transition-colors"
-                >
-                  {cat.name}
-                </Link>
-              ))}
-            </nav>
+            <NavLinks categories={categories} />
 
             {/* Acciones derecha */}
             <div className="flex items-center gap-2">

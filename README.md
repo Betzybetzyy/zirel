@@ -1,36 +1,137 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Zirel Joyería — E-commerce
 
-## Getting Started
+Tienda en línea de joyería en plata 925. Next.js 16 + PostgreSQL (Neon) + Cloudinary.
 
-First, run the development server:
+## Stack
+
+- **Framework:** Next.js 16 con Turbopack y React Compiler
+- **Base de datos:** PostgreSQL vía Neon (serverless), ORM Prisma 7
+- **Imágenes:** Cloudinary
+- **UI:** Tailwind CSS v4 + shadcn/ui + Radix UI
+- **Estado:** Zustand (carrito)
+
+---
+
+## Variables de entorno
+
+Crea un archivo `.env` en la raíz con las siguientes variables:
+
+```env
+# Base de datos (Neon PostgreSQL)
+DATABASE_URL=
+
+# Cloudinary
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=
+
+# WhatsApp (número sin + ni espacios, ej: 56912345678)
+NEXT_PUBLIC_WHATSAPP_NUMBER=
+```
+
+---
+
+## Instalación y setup
+
+### 1. Instalar dependencias
+
+```bash
+npm install
+```
+
+Esto también ejecuta `prisma generate` automáticamente via `postinstall`.
+
+### 2. Sincronizar schema con la base de datos
+
+```bash
+npx prisma db push
+```
+
+### 3. (Opcional) Seed de productos
+
+Requiere el archivo `seed-data/inventario.xlsx` y fotos en `seed-data/fotos/` organizadas por categoría (`anillos/`, `aros/`, `pulseras/`, `collares/`).
+
+```bash
+npm run db:seed
+```
+
+Para re-seedear solo algunos productos por SKU:
+
+```bash
+npm run db:seed -- --only=ANI-001,ANI-002
+```
+
+---
+
+## Desarrollo
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abre [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Producción
 
-## Learn More
+```bash
+# Build
+npm run build
 
-To learn more about Next.js, take a look at the following resources:
+# Iniciar servidor
+npm start
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Comandos de base de datos
 
-## Deploy on Vercel
+| Comando | Descripción |
+|---------|-------------|
+| `npx prisma generate` | Regenera el cliente de Prisma tras cambios en el schema |
+| `npx prisma db push` | Aplica el schema a la base de datos sin migraciones |
+| `npx prisma studio` | Abre Prisma Studio (UI para explorar la BD) |
+| `npm run db:seed` | Seed completo desde Excel + sube imágenes a Cloudinary |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Scripts disponibles
+
+| Script | Descripción |
+|--------|-------------|
+| `npm run dev` | Servidor de desarrollo con Turbopack |
+| `npm run build` | Build de producción con Turbopack |
+| `npm start` | Inicia servidor de producción |
+| `npm run lint` | Ejecuta ESLint |
+| `npm run db:generate` | `prisma generate` |
+| `npm run db:seed` | Seed de productos desde Excel |
+
+---
+
+## Estructura principal
+
+```
+app/
+├── page.tsx                  # Home
+├── catalogo/                 # Listado por categoría
+├── producto/[slug]/          # Detalle de producto
+├── carrito/                  # Carrito de compras
+├── checkout/                 # Formulario de pedido
+├── pedido-confirmado/        # Confirmación de orden
+└── actions/                  # Server Actions (órdenes)
+
+components/                   # Componentes reutilizables
+lib/
+├── prisma.ts                 # Singleton Prisma client
+├── queries.ts                # Queries a la BD
+├── cart-store.ts             # Estado del carrito (Zustand)
+└── whatsapp.ts               # Integración WhatsApp
+
+prisma/schema.prisma          # Schema de la BD
+scripts/seed.ts               # Script de carga masiva
+seed-data/
+├── inventario.xlsx           # Inventario de productos
+└── fotos/                    # Fotos por categoría
+```
