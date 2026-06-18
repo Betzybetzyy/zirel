@@ -25,9 +25,7 @@ export async function proxy(req: NextRequest) {
   const session = await getSession(req);
 
   if (!session?.userId) {
-    const loginUrl = new URL("/login", req.nextUrl);
-    loginUrl.searchParams.set("next", pathname);
-    return NextResponse.redirect(loginUrl);
+    return NextResponse.redirect(new URL("/", req.nextUrl));
   }
 
   if (session.role !== "ADMIN") {
