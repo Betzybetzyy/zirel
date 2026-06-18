@@ -1,4 +1,5 @@
 import { prisma } from "./prisma";
+import { buildFlagDefaults, FEATURE_FLAGS, type AdminFlag, type FeatureFlagMap } from "./feature-flags";
 
 /**
  * Obtiene email y rol de un usuario por su ID (usado en el layout admin)
@@ -70,6 +71,58 @@ export async function getProductBySlug(slug: string) {
       },
     },
   });
+}
+
+/**
+ * Lee todos los feature flags desde DB, merged con sus defaults.
+ * Flags ausentes en DB usan el valor default definido en lib/feature-flags.ts.
+ */
+export async function getFeatureFlags(): Promise<FeatureFlagMap> {
+  const rows = await prisma.featureFlag.findMany();
+  const map = buildFlagDefaults();
+  for (const row of rows) {
+    if (row.key in map) {
+      (map as Record<string, boolean>)[row.key] = row.enabled;
+    }
+  }
+  return map;
+}
+
+/**
+ * Devuelve todos los flags para el admin: estáticos (label desde código) +
+ * dinámicos creados desde la UI (label desde DB). Los estáticos van primero.
+ */
+export async function getAllFlagsForAdmin(): Promise<AdminFlag[]> {
+  const rows = await prisma.featureFlag.findMany();
+  const dbMap = new Map(rows.map((r) => [r.key, r]));
+  const staticKeys = new Set(FEATURE_FLAGS.map((f) => f.key));
+
+  const result: AdminFlag[] = [];
+
+  for (const staticFlag of FEATURE_FLAGS) {
+    const db = dbMap.get(staticFlag.key);
+    result.push({
+      key: staticFlag.key,
+      label: staticFlag.label,
+      description: staticFlag.description,
+      enabled: db?.enabled ?? staticFlag.default,
+      isDynamic: false,
+    });
+  }
+
+  for (const row of rows) {
+    if (!staticKeys.has(row.key)) {
+      result.push({
+        key: row.key,
+        label: row.label || row.key,
+        description: row.description,
+        enabled: row.enabled,
+        isDynamic: true,
+      });
+    }
+  }
+
+  return result;
 }
 
 /**

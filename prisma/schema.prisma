@@ -155,3 +155,16 @@ model User {
 
   @@map("users")
 }
+
+// ============================================
+// FEATURE FLAGS (control de funcionalidades)
+// ============================================
+model FeatureFlag {
+  key         String   @id
+  label       String   @default("")
+  description String   @default("")
+  enabled     Boolean
+  updatedAt   DateTime @updatedAt
+
+  @@map("feature_flags")
+}

@@ -1,4 +1,4 @@
-import { getProductBySlug } from "@/lib/queries";
+import { getProductBySlug, getFeatureFlags } from "@/lib/queries";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -30,7 +30,10 @@ export default async function ProductPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const product = await getProductBySlug(slug);
+  const [product, flags] = await Promise.all([
+    getProductBySlug(slug),
+    getFeatureFlags(),
+  ]);
 
   if (!product) {
     notFound();
@@ -213,14 +216,16 @@ export default async function ProductPage({
                 </span>
               </div>
 
-              <AddToCartButton
-                productId={product.id}
-                sku={product.sku}
-                slug={product.slug}
-                name={product.name}
-                price={product.price}
-                imageUrl={mainImage?.url}
-              />
+              {flags.cart && (
+                <AddToCartButton
+                  productId={product.id}
+                  sku={product.sku}
+                  slug={product.slug}
+                  name={product.name}
+                  price={product.price}
+                  imageUrl={mainImage?.url}
+                />
+              )}
 
               <div className="mt-8 pt-6 border-t border-[var(--zirel-arena)]/30">
                 <Link

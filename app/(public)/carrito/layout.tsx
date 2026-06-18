@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { getFeatureFlags } from "@/lib/queries";
 
 export const metadata: Metadata = {
   title: "Tu carrito | Zirel Joyería",
@@ -6,6 +8,14 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function CarritoLayout({ children }: { children: React.ReactNode }) {
+export default async function CarritoLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const flags = await getFeatureFlags();
+  if (!flags.cart) {
+    redirect("/catalogo");
+  }
   return children;
 }
