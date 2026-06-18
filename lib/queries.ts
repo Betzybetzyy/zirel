@@ -78,12 +78,16 @@ export async function getProductBySlug(slug: string) {
  * Flags ausentes en DB usan el valor default definido en lib/feature-flags.ts.
  */
 export async function getFeatureFlags(): Promise<FeatureFlagMap> {
-  const rows = await prisma.featureFlag.findMany();
   const map = buildFlagDefaults();
-  for (const row of rows) {
-    if (row.key in map) {
-      (map as Record<string, boolean>)[row.key] = row.enabled;
+  try {
+    const rows = await prisma.featureFlag.findMany();
+    for (const row of rows) {
+      if (row.key in map) {
+        (map as Record<string, boolean>)[row.key] = row.enabled;
+      }
     }
+  } catch {
+    // DB unreachable at build time — use defaults
   }
   return map;
 }
