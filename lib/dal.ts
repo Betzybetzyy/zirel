@@ -8,7 +8,7 @@ export const verifySession = cache(async (): Promise<SessionPayload> => {
   const token = (await cookies()).get("session")?.value;
   const session = await decrypt(token);
   if (!session?.userId) {
-    redirect("/login");
+    redirect("/");
   }
   return session;
 });
