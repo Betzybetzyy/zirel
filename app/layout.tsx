@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Libre_Baskerville, Nunito_Sans } from "next/font/google";
 import "./globals.css";
-import { Header } from "@/components/ui/header";
-import { Footer } from "@/components/ui/footer";
 import { Toaster } from "sonner";
 
 const baskerville = Libre_Baskerville({
@@ -35,12 +33,8 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="es">
-      <body
-        className={`${baskerville.variable} ${nunito.variable} antialiased`}
-      >
-        <Header />
-        <main className="min-h-screen">{children}</main>
-        <Footer />
+      <body className={`${baskerville.variable} ${nunito.variable} antialiased`}>
+        {children}
         <Toaster
           position="top-center"
           toastOptions={{
