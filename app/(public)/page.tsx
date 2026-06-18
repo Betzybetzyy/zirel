@@ -34,7 +34,7 @@ export default async function Home() {
             alt="Zirel Joyería"
             width={1100}
             height={505}
-            className="w-64 md:w-80 h-auto mix-blend-multiply"
+            className="w-64 md:w-80 h-auto hero-logo"
             priority
           />
 
@@ -63,7 +63,7 @@ export default async function Home() {
       </section>
 
       {/* BRAND VALUES STRIP */}
-      <div className="bg-[var(--zirel-negro-suave)] py-5">
+      <div className="bg-[var(--surface-inverse)] py-5">
         <div className="mx-auto max-w-7xl px-6">
           <ul className="grid grid-cols-2 md:grid-cols-4 gap-y-4 gap-x-0 md:divide-x md:divide-[var(--zirel-marfil)]/10">
             {[
@@ -79,7 +79,7 @@ export default async function Home() {
                 <span className="text-[var(--zirel-dorado-beige)] text-xs tracking-[0.2em] uppercase font-medium">
                   {item.label}
                 </span>
-                <span className="text-[var(--zirel-marfil)]/35 text-[11px]">
+                <span className="text-[var(--on-surface-inverse)]/35 text-[11px]">
                   {item.sub}
                 </span>
               </li>
@@ -170,11 +170,11 @@ export default async function Home() {
       </section>
 
       {/* MANIFESTO */}
-      <section className="bg-[var(--zirel-negro-suave)] py-28 px-6">
+      <section className="bg-[var(--surface-inverse)] py-28 px-6">
         <div className="mx-auto max-w-2xl text-center">
           <div className="w-14 h-px bg-[var(--zirel-dorado-beige)]/35 mx-auto mb-12" />
-          <blockquote className="font-serif text-3xl md:text-4xl lg:text-[2.6rem] text-[var(--zirel-marfil)] leading-snug italic">
-            "Cada joya nace con la intención de acompañarte en los momentos que importan."
+          <blockquote className="font-serif text-3xl md:text-4xl lg:text-[2.6rem] text-[var(--on-surface-inverse)] leading-snug italic">
+            &ldquo;Cada joya nace con la intención de acompañarte en los momentos que importan.&rdquo;
           </blockquote>
           <div className="w-14 h-px bg-[var(--zirel-dorado-beige)]/35 mx-auto mt-12 mb-8" />
           <span className="text-[var(--zirel-dorado-beige)] text-[10px] tracking-[0.4em] uppercase">

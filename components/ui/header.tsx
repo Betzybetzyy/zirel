@@ -1,10 +1,11 @@
 import Link from "next/link";
-import Image from "next/image";
 import { getCategories } from "@/lib/queries";
 import { CartButton } from "./cart-button";
 import { CartDrawer } from "./cart-drawer";
 import { MobileMenu } from "./mobile-menu";
 import { NavLinks } from "./nav-links";
+import { ThemeToggle } from "./theme-toggle";
+import { PublicLogo } from "./public-logo";
 
 interface HeaderProps {
   cartEnabled?: boolean;
@@ -20,14 +21,7 @@ export async function Header({ cartEnabled = true }: HeaderProps) {
           <div className="flex h-20 items-center justify-between">
             {/* Logo */}
             <Link href="/">
-              <Image
-                src="/logo-alt.png"
-                alt="Zirel Joyería"
-                width={1100}
-                height={387}
-                className="h-14 w-auto mix-blend-multiply"
-                priority
-              />
+              <PublicLogo priority />
             </Link>
 
             {/* Navegación desktop */}
@@ -35,6 +29,7 @@ export async function Header({ cartEnabled = true }: HeaderProps) {
 
             {/* Acciones derecha */}
             <div className="flex items-center gap-2">
+              <ThemeToggle />
               {cartEnabled && <CartButton />}
               <div className="md:hidden">
                 <MobileMenu categories={categories} />

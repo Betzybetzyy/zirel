@@ -1,19 +1,12 @@
-import Image from "next/image";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { PublicLogo } from "@/components/ui/public-logo";
 
 export function Footer() {
   return (
     <footer className="border-t border-[var(--zirel-arena)]/40 mt-20">
       <div className="mx-auto max-w-7xl px-6 py-16">
         <div className="flex flex-col items-center text-center gap-4">
-          <Image
-            src="/logo-alt.png"
-            alt="Zirel Joyería"
-            width={1100}
-            height={387}
-            className="w-40 h-auto mix-blend-multiply"
-          />
+          <PublicLogo className="w-40 h-auto" />
           <div className="w-16 h-px bg-[var(--zirel-dorado-beige)] mt-2" />
           <p className="text-xs tracking-[0.3em] uppercase text-[var(--zirel-cafe-topo)]">
             Joyería en plata y oro
