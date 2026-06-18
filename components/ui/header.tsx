@@ -6,7 +6,11 @@ import { CartDrawer } from "./cart-drawer";
 import { MobileMenu } from "./mobile-menu";
 import { NavLinks } from "./nav-links";
 
-export async function Header() {
+interface HeaderProps {
+  cartEnabled?: boolean;
+}
+
+export async function Header({ cartEnabled = true }: HeaderProps) {
   const categories = await getCategories();
 
   return (
@@ -31,7 +35,7 @@ export async function Header() {
 
             {/* Acciones derecha */}
             <div className="flex items-center gap-2">
-              <CartButton />
+              {cartEnabled && <CartButton />}
               <div className="md:hidden">
                 <MobileMenu categories={categories} />
               </div>
@@ -39,7 +43,7 @@ export async function Header() {
           </div>
         </div>
       </header>
-      <CartDrawer />
+      {cartEnabled && <CartDrawer />}
     </>
   );
 }
