@@ -41,6 +41,8 @@ Cloudinary only. `ProductImage.url` stores the Cloudinary URL. `next.config.ts` 
 
 Tailwind v4 + shadcn/ui. Brand palette defined as CSS custom properties in `app/globals.css` under `/* === Paleta Zirel === */`. Always use these vars (`--zirel-*`) rather than arbitrary hex values. Fonts: `Libre_Baskerville` (headings) and `Nunito_Sans` (body).
 
+**REQUIRED:** Before writing any UI code — colors, typography, spacing, shadows, components, layout — read the relevant file in `docs/styles/`. Use `docs/styles.md` as the index to find the right file. Never guess design decisions; always consult the style docs first.
+
 ### DB
 
 Prisma 7 with `@prisma/adapter-pg` (driver adapter, not default connector). Singleton client in `lib/prisma.ts` uses `PrismaPg` adapter. Production DB is Neon (serverless PostgreSQL). Local dev can use Docker: `docker compose up db` exposes Postgres on port 5433.
