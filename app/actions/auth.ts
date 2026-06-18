@@ -16,7 +16,13 @@ export async function login(
     return "Email y contraseña son requeridos.";
   }
 
-  const user = await prisma.user.findUnique({ where: { email } });
+  let user;
+  try {
+    user = await prisma.user.findUnique({ where: { email } });
+  } catch {
+    return "Error de servidor. Intenta nuevamente.";
+  }
+
   if (!user) {
     return "Credenciales incorrectas.";
   }

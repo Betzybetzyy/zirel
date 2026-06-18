@@ -20,3 +20,14 @@ export const verifyAdmin = cache(async (): Promise<SessionPayload> => {
   }
   return session;
 });
+
+export const isAuthenticated = cache(async (): Promise<boolean> => {
+  const token = (await cookies()).get("session")?.value;
+  const session = await decrypt(token);
+  return !!session?.userId;
+});
+
+export const getCurrentUser = cache(async (): Promise<SessionPayload | null> => {
+  const token = (await cookies()).get("session")?.value;
+  return decrypt(token);
+});
