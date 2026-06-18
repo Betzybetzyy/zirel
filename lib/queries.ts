@@ -1,6 +1,16 @@
 import { prisma } from "./prisma";
 
 /**
+ * Obtiene email y rol de un usuario por su ID (usado en el layout admin)
+ */
+export async function getUserById(id: string) {
+  return prisma.user.findUnique({
+    where: { id },
+    select: { email: true, role: true },
+  });
+}
+
+/**
  * Obtiene todas las categorías ordenadas
  */
 export async function getCategories() {

@@ -1,6 +1,8 @@
 import { verifyAdmin } from "@/lib/dal";
-import { logout } from "@/app/actions/auth";
-import Image from "next/image";
+import { getUserById } from "@/lib/queries";
+import { AdminSidebar } from "@/components/admin/admin-sidebar";
+import { AdminNavbar } from "@/components/admin/admin-navbar";
+import { AdminShell } from "@/components/admin/admin-shell";
 
 export default async function AdminLayout({
   children,
@@ -8,35 +10,21 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }) {
   const session = await verifyAdmin();
+  const user = await getUserById(session.userId);
 
   return (
-    <div className="flex min-h-screen flex-col bg-[var(--zirel-marfil)]">
-      <header className="border-b border-[var(--zirel-arena)] bg-white px-6 py-3">
-        <div className="mx-auto flex max-w-7xl items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Image src="/logo.png" alt="Zirel" width={80} height={37} />
-            <span
-              className="text-sm font-semibold text-[var(--zirel-cafe-topo)]"
-              style={{ fontFamily: "var(--font-nunito)" }}
-            >
-              Admin
-            </span>
-          </div>
-          <form action={logout}>
-            <button
-              type="submit"
-              className="text-sm text-[var(--zirel-cafe-topo)] hover:text-[var(--zirel-negro-suave)] transition-colors"
-              style={{ fontFamily: "var(--font-nunito)" }}
-            >
-              Cerrar sesión
-            </button>
-          </form>
-        </div>
-      </header>
+    <AdminShell>
+      <AdminSidebar
+        userEmail={user?.email ?? session.userId}
+        userRole={user?.role ?? session.role}
+      />
 
-      <main className="flex-1 px-6 py-8">
-        <div className="mx-auto max-w-7xl">{children}</div>
-      </main>
-    </div>
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <AdminNavbar />
+        <main className="flex-1 overflow-y-auto px-6 py-8">
+          <div className="mx-auto max-w-7xl">{children}</div>
+        </main>
+      </div>
+    </AdminShell>
   );
 }

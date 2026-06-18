@@ -212,7 +212,7 @@ async function main() {
           : "Plata 925";
       const stock = row.Stock || 1;
 
-      let imageUrl: string;
+      let imageUrl: string | null;
 
       if (skipUpload) {
         imageUrl = cloudinaryUrl(sku);
@@ -221,22 +221,21 @@ async function main() {
         );
       } else {
         const photoFileName = row["Foto principal"]?.trim();
-        const photoPath = findPhotoPath(
-          path.join(FOTOS_DIR, config.folder),
-          photoFileName
-        );
+        const photoPath = photoFileName
+          ? findPhotoPath(path.join(FOTOS_DIR, config.folder), photoFileName)
+          : null;
 
         if (!photoPath) {
-          errors.push(
-            `${sku}: no se encontró la foto "${photoFileName}" en ${path.join(FOTOS_DIR, config.folder)}`
+          console.log(
+            `   ⚠️  ${sku}: foto "${photoFileName ?? "(sin nombre)"}" no encontrada — producto sin imagen`
           );
-          continue;
+          imageUrl = null;
+        } else {
+          process.stdout.write(
+            `   ⏳ ${sku} ${productName.padEnd(40)} subiendo...`
+          );
+          imageUrl = await uploadImage(photoPath, sku);
         }
-
-        process.stdout.write(
-          `   ⏳ ${sku} ${productName.padEnd(40)} subiendo...`
-        );
-        imageUrl = await uploadImage(photoPath, sku);
       }
 
       if (skipUpload || onlySkus) {
@@ -268,16 +267,18 @@ async function main() {
           },
         });
 
-        await prisma.productImage.deleteMany({ where: { productId: saved.id } });
-        await prisma.productImage.create({
-          data: {
-            url: imageUrl,
-            alt: productName,
-            order: 0,
-            isPrimary: true,
-            productId: saved.id,
-          },
-        });
+        if (imageUrl) {
+          await prisma.productImage.deleteMany({ where: { productId: saved.id } });
+          await prisma.productImage.create({
+            data: {
+              url: imageUrl,
+              alt: productName,
+              order: 0,
+              isPrimary: true,
+              productId: saved.id,
+            },
+          });
+        }
       } else {
         await prisma.product.create({
           data: {
@@ -291,14 +292,16 @@ async function main() {
             stock,
             active: isActive,
             categoryId,
-            images: {
-              create: {
-                url: imageUrl,
-                alt: productName,
-                order: 0,
-                isPrimary: true,
+            ...(imageUrl && {
+              images: {
+                create: {
+                  url: imageUrl,
+                  alt: productName,
+                  order: 0,
+                  isPrimary: true,
+                },
               },
-            },
+            }),
           },
         });
       }
