@@ -95,7 +95,7 @@ export async function getFeatureFlags(): Promise<FeatureFlagMap> {
 export async function getAllFlagsForAdmin(): Promise<AdminFlag[]> {
   const rows = await prisma.featureFlag.findMany();
   const dbMap = new Map(rows.map((r) => [r.key, r]));
-  const staticKeys = new Set(FEATURE_FLAGS.map((f) => f.key));
+  const staticKeys = new Set<string>(FEATURE_FLAGS.map((f) => f.key));
 
   const result: AdminFlag[] = [];
 
