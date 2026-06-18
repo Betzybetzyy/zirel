@@ -107,6 +107,42 @@
   --ring: #C7A87E;
 }
 
+/* === Toasts Sonner ===
+   Los toasts portalean a <body>, fuera del cascade de data-admin-theme.
+   Las vars --zirel-* no resuelven allí, por eso se usan los hex literales
+   del tema dark (mismos valores que en [data-admin-theme="dark"]).        */
+
+/* Toasts portalean a <body>, fuera del cascade de data-admin-theme.
+   Hex literales para garantizar resolución sin ancestor context.        */
+[data-sonner-toaster] {
+  --normal-bg: #E9DFD2;     /* --zirel-beige-suave: warm brand ivory */
+  --normal-text: #2B2623;   /* --zirel-negro-suave */
+  --normal-border: #DABF9D; /* --zirel-dorado-claro: golden border */
+  --border-radius: 0.375rem;
+}
+
+[data-sonner-toaster] [data-sonner-toast] {
+  box-shadow: 0 4px 20px color-mix(in srgb, #C7A87E 18%, transparent);
+}
+
+[data-sonner-toaster] [data-icon] {
+  color: #C7A87E; /* --zirel-dorado-beige */
+}
+
+[data-sonner-toaster][data-theme="dark"] {
+  --normal-bg: #221c19;
+  --normal-text: #ece4d8;
+  --normal-border: #C7A87E; /* golden border in dark for brand consistency */
+}
+
+[data-sonner-toaster][data-theme="dark"] [data-sonner-toast] {
+  box-shadow: 0 4px 20px color-mix(in srgb, #C7A87E 14%, transparent);
+}
+
+[data-sonner-toaster][data-theme="dark"] [data-icon] {
+  color: #C7A87E;
+}
+
 html {
   scroll-behavior: smooth;
 }

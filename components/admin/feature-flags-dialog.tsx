@@ -12,6 +12,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { type AdminFlag } from "@/lib/feature-flags";
 import { updateFeatureFlag, createFeatureFlag } from "@/app/actions/feature-flags";
+import { useAdminUIStore } from "@/lib/admin-ui-store";
 
 const FLAG_ICONS: Record<string, React.ReactNode> = {
   cart: <ShoppingCart className="size-4" />,
@@ -22,6 +23,7 @@ interface FeatureFlagsDialogProps {
 }
 
 export function FeatureFlagsDialog({ initial }: FeatureFlagsDialogProps) {
+  const adminTheme = useAdminUIStore((s) => s.theme);
   const [open, setOpen] = useState(false);
   const [flags, setFlags] = useState<AdminFlag[]>(initial);
   const [isPending, startTransition] = useTransition();
@@ -88,19 +90,20 @@ export function FeatureFlagsDialog({ initial }: FeatureFlagsDialogProps) {
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-md rounded-2xl overflow-hidden p-0">
+        <DialogContent data-admin-theme={adminTheme} className="max-w-md rounded-2xl overflow-hidden p-0">
           {/* Header */}
           <div
             className="px-5 py-4 border-b border-[var(--border)] flex items-center gap-3"
             style={{
-              background: "color-mix(in srgb, var(--zirel-marfil) 50%, white)",
+              background: adminTheme === "dark"
+                ? "var(--secondary)"
+                : "color-mix(in srgb, var(--zirel-marfil) 50%, white)",
             }}
           >
             <div
               className="size-7 rounded-md flex items-center justify-center shrink-0"
               style={{
-                background:
-                  "color-mix(in srgb, var(--zirel-dorado-beige) 15%, transparent)",
+                background: "color-mix(in srgb, var(--zirel-dorado-beige) 18%, var(--card))",
                 color: "var(--zirel-dorado-beige)",
               }}
             >
@@ -115,13 +118,13 @@ export function FeatureFlagsDialog({ initial }: FeatureFlagsDialogProps) {
           </div>
 
           {/* Flag list */}
-          <div className="px-4 pt-3">
+          <div className="px-4 pt-2 pb-3">
             {flags.map((flag) => {
               const isActive = flag.enabled;
               return (
                 <div
                   key={flag.key}
-                  className="flex items-center gap-4 px-3 py-4 rounded-xl transition-colors duration-200"
+                  className="flex items-center gap-4 px-3 py-3 rounded-xl transition-colors duration-200"
                   style={{
                     background: isActive
                       ? "color-mix(in srgb, var(--zirel-dorado-beige) 8%, transparent)"
@@ -133,10 +136,10 @@ export function FeatureFlagsDialog({ initial }: FeatureFlagsDialogProps) {
                     style={{
                       background: isActive
                         ? "color-mix(in srgb, var(--zirel-dorado-beige) 18%, transparent)"
-                        : "var(--zirel-beige-suave)",
+                        : "var(--secondary)",
                       color: isActive
                         ? "var(--zirel-dorado-beige)"
-                        : "var(--zirel-cafe-topo)",
+                        : "var(--muted-foreground)",
                     }}
                   >
                     {FLAG_ICONS[flag.key] ?? <SlidersHorizontal className="size-4" />}
@@ -155,8 +158,8 @@ export function FeatureFlagsDialog({ initial }: FeatureFlagsDialogProps) {
                         style={{
                           background: isActive
                             ? "color-mix(in srgb, var(--zirel-dorado-beige) 18%, transparent)"
-                            : "var(--zirel-beige-suave)",
-                          color: "var(--zirel-cafe-topo)",
+                            : "var(--secondary)",
+                          color: "var(--muted-foreground)",
                         }}
                       >
                         {isActive ? "activo" : "inactivo"}
@@ -165,8 +168,8 @@ export function FeatureFlagsDialog({ initial }: FeatureFlagsDialogProps) {
                         <span
                           className="text-[9px] font-bold tracking-[0.15em] uppercase px-1.5 py-0.5 rounded-sm"
                           style={{
-                            background: "var(--zirel-beige-suave)",
-                            color: "var(--zirel-cafe-topo)",
+                            background: "var(--secondary)",
+                            color: "var(--muted-foreground)",
                           }}
                         >
                           dinámico
