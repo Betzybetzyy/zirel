@@ -94,14 +94,17 @@
   --card-foreground: #ece4d8;
   --popover: #221c19;
   --popover-foreground: #ece4d8;
-  --primary: #ece4d8;
-  --primary-foreground: #191411;
-  --secondary: #2e2620;
-  --secondary-foreground: #ece4d8;
+  --primary: #C7A87E;
+  --primary-foreground: #1e1a17;
+  --secondary: #332b25;
+  --secondary-foreground: #d4c4b0;
   --muted: #2e2620;
   --muted-foreground: #a08878;
-  --border: #3a3028;
-  --input: #3a3028;
+  --accent: #C7A87E;
+  --accent-foreground: #1e1a17;
+  --border: #4a3c32;
+  --input: #4a3c32;
+  --ring: #C7A87E;
 }
 
 html {

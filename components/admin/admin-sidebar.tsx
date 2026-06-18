@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { ChevronLeft, ChevronRight, LogOut, Sun, Moon } from "lucide-react";
+import { ChevronLeft, ChevronRight, LogOut, Sun, Moon, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { adminNavItems } from "@/lib/admin-nav";
 import { useAdminUIStore } from "@/lib/admin-ui-store";
@@ -155,6 +155,22 @@ export function AdminSidebar({ userEmail, userRole }: Props) {
             </div>
           )}
         </div>
+
+        {/* Ver tienda */}
+        <Link
+          href="/"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Ver tienda"
+          className={cn(
+            "flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] text-[var(--admin-sidebar-dim)] hover:bg-[var(--admin-sidebar-hover)] hover:text-[var(--admin-sidebar-text)] transition-colors mb-0.5",
+            collapsed && "justify-center"
+          )}
+          style={{ fontFamily: "var(--font-nunito)" }}
+        >
+          <ExternalLink className="h-3.5 w-3.5 flex-shrink-0" />
+          {!collapsed && <span>Ver tienda</span>}
+        </Link>
 
         {/* Theme toggle */}
         <button
