@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { toast } from "sonner";
+import { sileo } from "sileo";
 import { SlidersHorizontal, ShoppingCart, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -43,10 +43,16 @@ export function FeatureFlagsDialog({ initial }: FeatureFlagsDialogProps) {
         setFlags((prev) =>
           prev.map((f) => (f.key === key ? { ...f, enabled: !value } : f))
         );
-        toast.error("No se pudo guardar el cambio.");
+        sileo.error({
+          title: "Error al guardar",
+          description: "No se pudo actualizar el flag.",
+        });
       } else {
         const label = flags.find((f) => f.key === key)?.label ?? key;
-        toast.success(`${label} ${value ? "activado" : "desactivado"}.`);
+        sileo.success({
+          title: `${label} ${value ? "activado" : "desactivado"}`,
+          description: `El flag fue ${value ? "activado" : "desactivado"} correctamente.`,
+        });
       }
     });
   }
@@ -59,7 +65,10 @@ export function FeatureFlagsDialog({ initial }: FeatureFlagsDialogProps) {
         description: newDesc,
       });
       if (!result.success) {
-        toast.error(result.error ?? "No se pudo crear el flag.");
+        sileo.error({
+          title: "Error al crear",
+          description: result.error ?? "No se pudo crear el flag.",
+        });
       } else {
         setFlags((prev) => [
           ...prev,
@@ -69,7 +78,10 @@ export function FeatureFlagsDialog({ initial }: FeatureFlagsDialogProps) {
         setNewLabel("");
         setNewDesc("");
         setShowCreate(false);
-        toast.success(`Flag "${newLabel}" creado.`);
+        sileo.success({
+          title: `"${newLabel}" creado`,
+          description: "El flag fue creado correctamente.",
+        });
       }
     });
   }

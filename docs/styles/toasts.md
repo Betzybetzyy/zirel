@@ -1,4 +1,4 @@
-# Notificaciones / Toasts (Sonner)
+# Notificaciones / Toasts (Sileo)
 
 Componente: `components/ui/sonner.tsx`, montado una sola vez en `app/layout.tsx` como `<Toaster />`.
 
@@ -7,39 +7,49 @@ Componente: `components/ui/sonner.tsx`, montado una sola vez en `app/layout.tsx`
 | Prop | Valor |
 |---|---|
 | `position` | `top-center` |
-| `closeButton` | siempre visible |
-| `theme` | dinámico (ver abajo) |
+| `key` | `"dark"` o `"light"` (fuerza remount al cambiar tema) |
+| `options` | dinámico (ver abajo) |
 
-Íconos lucide por tipo: `CircleCheckIcon` (success), `OctagonXIcon` (error), `InfoIcon` (info), `TriangleAlertIcon` (warning), `Loader2Icon` (loading). Color de ícono = `--zirel-dorado-beige`.
+Sin íconos custom — Sileo usa su propio sistema SVG con morfing animado.
 
-## Tema dark/light — quirk importante
+## Tema dark/light
 
-Sonner portalea sus toasts a `<body>`, **fuera** del `<div data-admin-theme>` que envuelve el admin. Las vars `--zirel-*` no resuelven al tema oscuro dentro del portal.
+El wrapper lee dos stores según la ruta:
 
-Solución implementada:
-- El wrapper lee `useAdminUIStore((s) => s.theme)` y `usePathname()`.
-- Solo activa dark si `pathname.startsWith("/admin") && theme === "dark"`.
-- Sitio público siempre light (aunque el store persista `"dark"` de visita anterior al admin).
+- `/admin` → `useAdminUIStore((s) => s.theme)`
+- resto → `useThemeStore((s) => s.theme)`
 
-## Colores (en `app/globals.css` bajo `[data-sonner-toaster]`)
+`key={isDark ? "dark" : "light"}` fuerza un remount completo del Toaster al cambiar tema, necesario porque `options.fill` en Sileo no es reactivo después del mount inicial.
 
-| Modo | Fondo | Texto | Borde |
+## Opciones por tema
+
+| Modo | `fill` | Texto título | Texto descripción |
 |---|---|---|---|
-| Light | `var(--zirel-marfil)` | `var(--zirel-negro-suave)` | `var(--zirel-arena)` |
-| Dark | `#221c19` | `#ece4d8` | `#4a3c32` |
+| Light | `#FFFFFF` (default) | natural (oscuro) | natural (gris) |
+| Dark | `#171717` | `text-white!` | `text-white/75!` |
 
-Los hexes dark son los mismos del bloque `[data-admin-theme="dark"]` en globals.css. Se duplican explícitos porque las vars CSS no cruzan el portal de sonner.
-
-Sombra: `0 4px 24px color-mix(in srgb, var(--zirel-cafe-topo) 12%, transparent)`.
+El badge/círculo de estado mantiene siempre su color de notificación (verde/rojo/amber/azul) — no se sobreescribe.
 
 ## Uso
 
 ```ts
-import { toast } from "sonner"
+import { sileo } from "sileo"
 
-toast.success("Producto añadido al carrito")
-toast.error("Tu carrito está vacío")
-toast("Mensaje neutro")
+// éxito con descripción
+sileo.success({
+  title: "Añadido al carrito",
+  description: "Producto fue agregado exitosamente.",
+})
+
+// error con descripción
+sileo.error({
+  title: "Error en el pedido",
+  description: "Inténtalo nuevamente.",
+})
+
+// warning / info
+sileo.warning({ title: "Almacenamiento casi lleno" })
+sileo.info({ title: "Nueva actualización disponible" })
 ```
 
-No pasar estilos inline en el call-site — el theming vive en el wrapper y en globals.css.
+Estructura siempre `{ title, description? }`. No usar string directo. No pasar `fill` ni `styles` en el call-site — el theming global vive en el wrapper.

@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/lib/cart-store";
-import { toast } from "sonner";
+import { sileo } from "sileo";
 import { ShoppingBag, Check } from "lucide-react";
 import { useState } from "react";
 
@@ -22,8 +22,9 @@ export function AddToCartButton({ productId, sku, slug, name, price, imageUrl }:
   const handleAdd = () => {
     addItem({ productId, sku, slug, name, price, imageUrl });
     setJustAdded(true);
-    toast.success(`${name} añadido al carrito`, {
-      description: "Revisa tu carrito para finalizar la compra.",
+    sileo.success({
+      title: "Añadido al carrito",
+      description: `${name} fue agregado exitosamente.`,
     });
 
     // Reset visual del botón

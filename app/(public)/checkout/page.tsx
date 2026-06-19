@@ -13,7 +13,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { sileo } from "sileo";
 import { Loader2, ArrowLeft } from "lucide-react";
 
 export default function CheckoutPage() {
@@ -43,7 +43,10 @@ export default function CheckoutPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (items.length === 0) {
-      toast.error("Tu carrito está vacío");
+      sileo.error({
+        title: "Carrito vacío",
+        description: "Agrega productos antes de continuar.",
+      });
       return;
     }
 
@@ -61,7 +64,10 @@ export default function CheckoutPage() {
     });
 
     if (!result.success) {
-      toast.error(result.error);
+      sileo.error({
+        title: "Error en el pedido",
+        description: result.error ?? "Inténtalo nuevamente.",
+      });
       setSubmitting(false);
       return;
     }
