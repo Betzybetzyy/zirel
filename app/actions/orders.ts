@@ -2,28 +2,9 @@
 
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { orderSchema, type CreateOrderInput } from "@/lib/schemas/order";
 
-const orderSchema = z.object({
-  customerName: z.string().min(2, "Nombre muy corto").max(100),
-  customerEmail: z.string().check(z.email({ error: "Email inválido" })),
-  customerPhone: z.string().min(8, "Teléfono inválido").max(20),
-  customerAddress: z.string().max(200).optional(),
-  customerComuna: z.string().max(100).optional(),
-  customerNotes: z.string().max(500).optional(),
-  items: z
-    .array(
-      z.object({
-        productId: z.string(),
-        sku: z.string(),
-        name: z.string(),
-        price: z.number(),
-        quantity: z.number().min(1).max(99),
-      })
-    )
-    .min(1, "El carrito está vacío"),
-});
-
-export type CreateOrderInput = z.infer<typeof orderSchema>;
+export type { CreateOrderInput };
 
 export async function createOrder(input: CreateOrderInput) {
   try {
