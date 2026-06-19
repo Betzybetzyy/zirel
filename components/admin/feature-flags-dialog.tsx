@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { sileo } from "sileo";
 import { SlidersHorizontal, ShoppingCart, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,6 +15,7 @@ import { Switch } from "@/components/ui/switch";
 import { type AdminFlag } from "@/lib/feature-flags";
 import { updateFeatureFlag, createFeatureFlag } from "@/app/actions/feature-flags";
 import { useAdminUIStore } from "@/lib/admin-ui-store";
+import { createFeatureFlagSchema, type CreateFeatureFlagInput } from "@/lib/schemas/feature-flag";
 
 const FLAG_ICONS: Record<string, React.ReactNode> = {
   cart: <ShoppingCart className="size-4" />,
@@ -28,10 +31,11 @@ export function FeatureFlagsDialog({ initial }: FeatureFlagsDialogProps) {
   const [flags, setFlags] = useState<AdminFlag[]>(initial);
   const [isPending, startTransition] = useTransition();
   const [showCreate, setShowCreate] = useState(false);
-  const [newKey, setNewKey] = useState("");
-  const [newLabel, setNewLabel] = useState("");
-  const [newDesc, setNewDesc] = useState("");
-  const [isCreating, startCreate] = useTransition();
+
+  const form = useForm<CreateFeatureFlagInput>({
+    resolver: zodResolver(createFeatureFlagSchema),
+    defaultValues: { key: "", label: "", description: "" },
+  });
 
   function handleToggle(key: string, value: boolean) {
     setFlags((prev) =>
@@ -57,39 +61,44 @@ export function FeatureFlagsDialog({ initial }: FeatureFlagsDialogProps) {
     });
   }
 
-  function handleCreate() {
-    startCreate(async () => {
-      const result = await createFeatureFlag({
-        key: newKey,
-        label: newLabel,
-        description: newDesc,
-      });
-      if (!result.success) {
-        sileo.error({
-          title: "Error al crear",
-          description: result.error ?? "No se pudo crear el flag.",
-        });
-      } else {
-        setFlags((prev) => [
-          ...prev,
-          { key: newKey, label: newLabel, description: newDesc, enabled: false, isDynamic: true },
-        ]);
-        setNewKey("");
-        setNewLabel("");
-        setNewDesc("");
-        setShowCreate(false);
-        sileo.success({
-          title: `"${newLabel}" creado`,
-          description: "El flag fue creado correctamente.",
-        });
-      }
+  const handleCreate = form.handleSubmit(async (data) => {
+    const result = await createFeatureFlag({
+      key: data.key,
+      label: data.label,
+      description: data.description ?? "",
     });
-  }
+    if (!result.success) {
+      sileo.error({
+        title: "Error al crear",
+        description: result.error ?? "No se pudo crear el flag.",
+      });
+    } else {
+      setFlags((prev) => [
+        ...prev,
+        {
+          key: data.key,
+          label: data.label,
+          description: data.description ?? "",
+          enabled: false,
+          isDynamic: true,
+        },
+      ]);
+      form.reset();
+      setShowCreate(false);
+      sileo.success({
+        title: `"${data.label}" creado`,
+        description: "El flag fue creado correctamente.",
+      });
+    }
+  });
 
-  const canSubmit =
-    newKey.length >= 2 &&
-    /^[a-z][a-z0-9_-]*$/.test(newKey) &&
-    newLabel.trim().length >= 2;
+  const isCreating = form.formState.isSubmitting;
+  const errors = form.formState.errors;
+
+  function handleCloseCreate() {
+    setShowCreate(false);
+    form.reset();
+  }
 
   return (
     <>
@@ -211,9 +220,7 @@ export function FeatureFlagsDialog({ initial }: FeatureFlagsDialogProps) {
           </div>
 
           {/* Create section */}
-          <div
-            className="mx-4 mb-4 rounded-xl border border-dashed border-[var(--border)] overflow-hidden transition-all duration-200"
-          >
+          <div className="mx-4 mb-4 rounded-xl border border-dashed border-[var(--border)] overflow-hidden transition-all duration-200">
             {!showCreate ? (
               <button
                 onClick={() => setShowCreate(true)}
@@ -224,7 +231,7 @@ export function FeatureFlagsDialog({ initial }: FeatureFlagsDialogProps) {
                 Nuevo flag
               </button>
             ) : (
-              <div className="p-4 space-y-3">
+              <form onSubmit={handleCreate} className="p-4 space-y-3">
                 <div className="flex items-center justify-between mb-1">
                   <p
                     className="text-xs font-semibold tracking-widest uppercase text-[var(--muted-foreground)]"
@@ -233,12 +240,8 @@ export function FeatureFlagsDialog({ initial }: FeatureFlagsDialogProps) {
                     Nuevo flag
                   </p>
                   <button
-                    onClick={() => {
-                      setShowCreate(false);
-                      setNewKey("");
-                      setNewLabel("");
-                      setNewDesc("");
-                    }}
+                    type="button"
+                    onClick={handleCloseCreate}
                     className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
                   >
                     <X className="size-3.5" />
@@ -255,12 +258,20 @@ export function FeatureFlagsDialog({ initial }: FeatureFlagsDialogProps) {
                     </label>
                     <input
                       type="text"
-                      value={newKey}
-                      onChange={(e) => setNewKey(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ""))}
                       placeholder="mi_flag"
-                      className="w-full px-3 py-1.5 text-xs rounded-lg border border-[var(--border)] bg-transparent text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:ring-1 focus:ring-[var(--zirel-dorado-beige)]"
+                      className="w-full px-3 py-1.5 text-xs rounded-lg border border-[var(--border)] bg-transparent text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:ring-1 focus:ring-[var(--zirel-dorado-beige)] aria-invalid:border-destructive"
                       style={{ fontFamily: "var(--font-nunito)" }}
+                      aria-invalid={!!errors.key}
+                      {...form.register("key", {
+                        setValueAs: (v: string) =>
+                          v.toLowerCase().replace(/[^a-z0-9_-]/g, ""),
+                      })}
                     />
+                    {errors.key && (
+                      <p className="mt-0.5 text-[10px] text-destructive" role="alert">
+                        {errors.key.message}
+                      </p>
+                    )}
                   </div>
                   <div className="flex-[1.5]">
                     <label
@@ -271,12 +282,17 @@ export function FeatureFlagsDialog({ initial }: FeatureFlagsDialogProps) {
                     </label>
                     <input
                       type="text"
-                      value={newLabel}
-                      onChange={(e) => setNewLabel(e.target.value)}
                       placeholder="Mi funcionalidad"
-                      className="w-full px-3 py-1.5 text-xs rounded-lg border border-[var(--border)] bg-transparent text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:ring-1 focus:ring-[var(--zirel-dorado-beige)]"
+                      className="w-full px-3 py-1.5 text-xs rounded-lg border border-[var(--border)] bg-transparent text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:ring-1 focus:ring-[var(--zirel-dorado-beige)] aria-invalid:border-destructive"
                       style={{ fontFamily: "var(--font-nunito)" }}
+                      aria-invalid={!!errors.label}
+                      {...form.register("label")}
                     />
+                    {errors.label && (
+                      <p className="mt-0.5 text-[10px] text-destructive" role="alert">
+                        {errors.label.message}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -285,27 +301,27 @@ export function FeatureFlagsDialog({ initial }: FeatureFlagsDialogProps) {
                     className="block text-[10px] font-semibold tracking-wider uppercase text-[var(--muted-foreground)] mb-1"
                     style={{ fontFamily: "var(--font-nunito)" }}
                   >
-                    Descripción <span className="normal-case tracking-normal font-normal">(opcional)</span>
+                    Descripción{" "}
+                    <span className="normal-case tracking-normal font-normal">(opcional)</span>
                   </label>
                   <input
                     type="text"
-                    value={newDesc}
-                    onChange={(e) => setNewDesc(e.target.value)}
                     placeholder="¿Qué hace este flag?"
                     className="w-full px-3 py-1.5 text-xs rounded-lg border border-[var(--border)] bg-transparent text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:ring-1 focus:ring-[var(--zirel-dorado-beige)]"
                     style={{ fontFamily: "var(--font-nunito)" }}
+                    {...form.register("description")}
                   />
                 </div>
 
                 <Button
+                  type="submit"
                   size="sm"
-                  onClick={handleCreate}
-                  disabled={!canSubmit || isCreating}
+                  disabled={isCreating}
                   className="w-full bg-[#C7A87E] text-[#1e1a17] hover:bg-[#DABF9D] border-0 font-semibold text-xs h-8"
                 >
                   {isCreating ? "Creando..." : "Crear flag"}
                 </Button>
-              </div>
+              </form>
             )}
           </div>
         </DialogContent>

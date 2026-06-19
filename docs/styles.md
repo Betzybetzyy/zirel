@@ -14,3 +14,4 @@ Lee solo el archivo que necesites.
 | [layout.md](styles/layout.md) | Header público, sidebar admin, imágenes de producto |
 | [feature-flags.md](styles/feature-flags.md) | Arquitectura flags estáticos/dinámicos, modelo DB, validación |
 | [rules.md](styles/rules.md) | Reglas generales: acento único, transiciones, z-index, color-mix |
+| [forms.md](styles/forms.md) | Patrón RHF + Zod, wrappers TextField/SelectField/DateField, schemas, ejemplo Producto |

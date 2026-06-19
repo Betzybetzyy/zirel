@@ -43,6 +43,17 @@ Tailwind v4 + shadcn/ui. Brand palette defined as CSS custom properties in `app/
 
 **REQUIRED:** Before writing any UI code — colors, typography, spacing, shadows, components, layout — read the relevant file in `docs/styles/`. Use `docs/styles.md` as the index to find the right file. Never guess design decisions; always consult the style docs first.
 
+### Forms
+
+All forms use **React Hook Form + Zod**. Pattern: `useForm({ resolver: zodResolver(schema) })` + `<Form {...form}>` + wrapper components.
+
+- **Schemas:** `lib/schemas/<dominio>.ts` (centralized, typed with `z.infer`). Shared messages in `lib/schemas/messages.ts`.
+- **Wrappers:** `components/form/TextField`, `SelectField`, `DateField` — auto-wire label, input, error per field via `FormProvider`.
+- **UI primitives:** `components/ui/form.tsx` (Form, FormField, FormItem, FormLabel, FormControl, FormMessage).
+- **Reference docs:** `docs/styles/forms.md` — full pattern, examples, and a reference Producto form for future admin CRUD.
+
+Rules: `isSubmitting` disables submit; `form.reset()` on success; `form.setError("root", ...)` for server errors; never duplicate types from `z.infer`.
+
 ### DB
 
 Prisma 7 with `@prisma/adapter-pg` (driver adapter, not default connector). Singleton client in `lib/prisma.ts` uses `PrismaPg` adapter. Production DB is Neon (serverless PostgreSQL). Local dev can use Docker: `docker compose up db` exposes Postgres on port 5433.
