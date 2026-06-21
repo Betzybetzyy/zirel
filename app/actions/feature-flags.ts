@@ -4,12 +4,10 @@ import { prisma } from "@/lib/prisma";
 import { verifyAdmin } from "@/lib/dal";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { flagKeySchema, createFeatureFlagSchema } from "@/lib/schemas/feature-flag";
 
-const keySchema = z
-  .string()
-  .min(2)
-  .max(50)
-  .regex(/^[a-z][a-z0-9_-]*$/, "Solo minúsculas, números, guion o guion bajo.");
+// Alias para compatibilidad interna
+const keySchema = flagKeySchema;
 
 export async function updateFeatureFlag(key: string, enabled: boolean) {
   try {
@@ -41,9 +39,14 @@ export async function createFeatureFlag(data: {
   try {
     await verifyAdmin();
 
-    const validKey = keySchema.parse(data.key);
-    const validLabel = z.string().min(2).max(80).parse(data.label.trim());
-    const validDesc = z.string().max(200).parse(data.description.trim());
+    const parsed = createFeatureFlagSchema.parse({
+      key: data.key,
+      label: data.label.trim(),
+      description: data.description.trim(),
+    });
+    const validKey = parsed.key;
+    const validLabel = parsed.label;
+    const validDesc = parsed.description ?? "";
 
     const existing = await prisma.featureFlag.findUnique({ where: { key: validKey } });
     if (existing) {

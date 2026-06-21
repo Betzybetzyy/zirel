@@ -130,6 +130,35 @@ export async function getAllFlagsForAdmin(): Promise<AdminFlag[]> {
 }
 
 /**
+ * Admin: todos los productos (activos e inactivos) con categoría e imagen principal
+ */
+export async function getAllProductsForAdmin() {
+  return prisma.product.findMany({
+    include: {
+      category: true,
+      images: {
+        where: { isPrimary: true },
+        take: 1,
+      },
+    },
+    orderBy: [{ category: { order: "asc" } }, { createdAt: "asc" }],
+  });
+}
+
+/**
+ * Admin: un producto por ID con categoría y todas sus imágenes
+ */
+export async function getProductForAdmin(id: string) {
+  return prisma.product.findUnique({
+    where: { id },
+    include: {
+      category: true,
+      images: { orderBy: { order: "asc" } },
+    },
+  });
+}
+
+/**
  * Obtiene productos destacados (featured) para el home
  */
 export async function getFeaturedProducts(limit = 4) {

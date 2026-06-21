@@ -3,18 +3,17 @@ import { redirect } from "next/navigation";
 import { compare } from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { createSession, deleteSession } from "@/lib/session";
+import { loginSchema, type LoginInput } from "@/lib/schemas/login";
 
-export async function login(
-  prevState: string | null,
-  formData: FormData
-): Promise<string | null> {
-  const email = (formData.get("email") as string)?.trim().toLowerCase();
-  const password = formData.get("password") as string;
-  const next = (formData.get("next") as string) || "/admin";
-
-  if (!email || !password) {
-    return "Email y contraseña son requeridos.";
+export async function login(data: LoginInput): Promise<string | null> {
+  const parsed = loginSchema.safeParse(data);
+  if (!parsed.success) {
+    return parsed.error.issues[0]?.message ?? "Datos inválidos.";
   }
+
+  const email = parsed.data.email.trim().toLowerCase();
+  const password = parsed.data.password;
+  const next = parsed.data.next || "/admin";
 
   let user;
   try {

@@ -33,7 +33,6 @@ export function ProductCard({ slug, name, price, imageUrl, imageAlt }: ProductCa
             fill
             sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
             className="object-contain transition-transform duration-700 group-hover:scale-103"
-            style={{ mixBlendMode: "multiply" }}
           />
         ) : (
           <div className="flex items-center justify-center h-full text-[var(--zirel-cafe-topo)]/40 text-xs font-serif italic">

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Libre_Baskerville, Nunito_Sans } from "next/font/google";
 import "./globals.css";
-import { Toaster } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
 
 const baskerville = Libre_Baskerville({
   variable: "--font-baskerville",
@@ -35,16 +35,7 @@ export default function RootLayout({
     <html lang="es">
       <body className={`${baskerville.variable} ${nunito.variable} antialiased`}>
         {children}
-        <Toaster
-          position="top-center"
-          toastOptions={{
-            style: {
-              background: "var(--zirel-marfil)",
-              color: "var(--zirel-negro-suave)",
-              border: "1px solid var(--zirel-arena)",
-            },
-          }}
-        />
+        <Toaster />
       </body>
     </html>
   );

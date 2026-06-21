@@ -13,6 +13,10 @@
   --zirel-cafe-topo: #6E5A4B;
   --zirel-negro-suave: #2B2623;
 
+  /* === Surfaces that stay dark in both modes === */
+  --surface-inverse: #2B2623;
+  --on-surface-inverse: #F7F3EE;
+
   /* === Admin sidebar — light mode === */
   --admin-sidebar-bg: #FFFFFF;
   --admin-sidebar-text: #5c4a3b;
@@ -71,8 +75,39 @@
   --font-sans: var(--font-nunito);
 }
 
+/* === Public dark theme === */
+[data-theme="dark"] {
+  --zirel-marfil: #191411;
+  --zirel-beige-suave: #231d1a;
+  --zirel-arena: #3a3028;
+  --zirel-dorado-claro: #a8845e;
+  --zirel-dorado-beige: #C7A87E;
+  --zirel-cafe-topo: #a08878;
+  --zirel-negro-suave: #ece4d8;
+
+  --background: #191411;
+  --foreground: #ece4d8;
+  --card: #221c19;
+  --card-foreground: #ece4d8;
+  --popover: #221c19;
+  --popover-foreground: #ece4d8;
+  --primary: #ece4d8;
+  --primary-foreground: #191411;
+  --secondary: #2e2620;
+  --secondary-foreground: #ece4d8;
+  --muted: #2e2620;
+  --muted-foreground: #a08878;
+  --border: #3a3028;
+  --input: #3a3028;
+
+  --surface-inverse: #191411;
+  --on-surface-inverse: #ece4d8;
+}
+
 /* === Admin dark theme === */
 [data-admin-theme="dark"] {
+  color: var(--foreground);
+
   /* Sidebar — dark mode */
   --admin-sidebar-bg: #2B2623;
   --admin-sidebar-text: #c8b5a2;
@@ -107,6 +142,70 @@
   --ring: #C7A87E;
 }
 
+/* === Portales Radix (Select, Dropdown, etc.) ===
+   Radix porta contenido a <body>, fuera del cascade de data-admin-theme/data-theme.
+   Igual que Sonner: hex literales directos sobre los data-slot del portal. */
+body:has([data-admin-theme="dark"]) [data-slot="select-content"] {
+  background-color: #221c19;
+  color: #ece4d8;
+  border-color: #4a3c32;
+}
+
+body:has([data-admin-theme="dark"]) [data-slot="select-item"] {
+  color: #ece4d8;
+}
+
+body:has([data-admin-theme="dark"]) [data-slot="select-item"]:focus {
+  background-color: #3e3530;
+  color: #C7A87E !important;
+}
+
+body:has([data-admin-theme="dark"]) [data-slot="select-item"]:focus * {
+  color: #C7A87E !important;
+}
+
+body:has([data-admin-theme="dark"]) [data-slot="select-scroll-up-button"],
+body:has([data-admin-theme="dark"]) [data-slot="select-scroll-down-button"] {
+  background-color: #221c19;
+  color: #ece4d8;
+}
+
+/* === Toasts Sonner ===
+   Los toasts portalean a <body>, fuera del cascade de data-admin-theme.
+   Las vars --zirel-* no resuelven allí, por eso se usan los hex literales
+   del tema dark (mismos valores que en [data-admin-theme="dark"]).        */
+
+/* Toasts portalean a <body>, fuera del cascade de data-admin-theme.
+   Hex literales para garantizar resolución sin ancestor context.        */
+[data-sonner-toaster] {
+  --normal-bg: #E9DFD2;     /* --zirel-beige-suave: warm brand ivory */
+  --normal-text: #2B2623;   /* --zirel-negro-suave */
+  --normal-border: #DABF9D; /* --zirel-dorado-claro: golden border */
+  --border-radius: 0.375rem;
+}
+
+[data-sonner-toaster] [data-sonner-toast] {
+  box-shadow: 0 4px 20px color-mix(in srgb, #C7A87E 18%, transparent);
+}
+
+[data-sonner-toaster] [data-icon] {
+  color: #C7A87E; /* --zirel-dorado-beige */
+}
+
+[data-sonner-toaster][data-theme="dark"] {
+  --normal-bg: #221c19;
+  --normal-text: #ece4d8;
+  --normal-border: #C7A87E; /* golden border in dark for brand consistency */
+}
+
+[data-sonner-toaster][data-theme="dark"] [data-sonner-toast] {
+  box-shadow: 0 4px 20px color-mix(in srgb, #C7A87E 14%, transparent);
+}
+
+[data-sonner-toaster][data-theme="dark"] [data-icon] {
+  color: #C7A87E;
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -136,4 +235,16 @@ h1, h2, h3, h4, h5, h6 {
 
 p {
   text-wrap: pretty;
+}
+
+.hero-logo,
+.public-logo {
+  mix-blend-mode: multiply;
+}
+
+[data-theme="dark"] .hero-logo,
+[data-theme="dark"] .public-logo {
+  mix-blend-mode: screen;
+  filter: invert(1) hue-rotate(180deg) saturate(2) brightness(1.1);
+  opacity: 0.9;
 }
