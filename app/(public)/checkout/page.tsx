@@ -84,6 +84,7 @@ export default function CheckoutPage() {
     const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "";
     const whatsappUrl = buildWhatsAppUrl(whatsappNumber, message);
 
+    form.reset();
     clearCart();
     router.push(
       `/pedido-confirmado?n=${result.order.orderNumber}&wsp=${encodeURIComponent(whatsappUrl)}`

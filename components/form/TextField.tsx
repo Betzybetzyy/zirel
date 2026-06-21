@@ -26,6 +26,7 @@ interface TextFieldProps {
   inputClassName?: string
   required?: boolean
   disabled?: boolean
+  readOnly?: boolean
   autoComplete?: string
 }
 
@@ -40,6 +41,7 @@ export function TextField({
   inputClassName,
   required,
   disabled,
+  readOnly,
   autoComplete,
 }: TextFieldProps) {
   const { control } = useFormContext()
@@ -50,7 +52,7 @@ export function TextField({
       name={name}
       render={({ field }) => (
         <FormItem className={className}>
-          <FormLabel className="text-[10px] tracking-widest uppercase text-[var(--zirel-cafe-topo)]">
+          <FormLabel className="text-[10px] tracking-widest uppercase text-foreground/70">
             {label}
             {required && <span className="text-destructive ml-0.5">*</span>}
           </FormLabel>
@@ -72,9 +74,11 @@ export function TextField({
                 type={type}
                 placeholder={placeholder}
                 disabled={disabled}
+                readOnly={readOnly}
                 autoComplete={autoComplete}
                 className={cn(
                   "rounded-none mt-0 px-3 border-[var(--zirel-arena)] focus-visible:ring-[var(--zirel-dorado-beige)]",
+                  readOnly && "cursor-default opacity-70 select-none focus-visible:ring-0",
                   inputClassName
                 )}
                 {...field}

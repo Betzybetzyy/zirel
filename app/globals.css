@@ -106,6 +106,8 @@
 
 /* === Admin dark theme === */
 [data-admin-theme="dark"] {
+  color: var(--foreground);
+
   /* Sidebar — dark mode */
   --admin-sidebar-bg: #2B2623;
   --admin-sidebar-text: #c8b5a2;
@@ -138,6 +140,34 @@
   --border: #4a3c32;
   --input: #4a3c32;
   --ring: #C7A87E;
+}
+
+/* === Portales Radix (Select, Dropdown, etc.) ===
+   Radix porta contenido a <body>, fuera del cascade de data-admin-theme/data-theme.
+   Igual que Sonner: hex literales directos sobre los data-slot del portal. */
+body:has([data-admin-theme="dark"]) [data-slot="select-content"] {
+  background-color: #221c19;
+  color: #ece4d8;
+  border-color: #4a3c32;
+}
+
+body:has([data-admin-theme="dark"]) [data-slot="select-item"] {
+  color: #ece4d8;
+}
+
+body:has([data-admin-theme="dark"]) [data-slot="select-item"]:focus {
+  background-color: #3e3530;
+  color: #C7A87E !important;
+}
+
+body:has([data-admin-theme="dark"]) [data-slot="select-item"]:focus * {
+  color: #C7A87E !important;
+}
+
+body:has([data-admin-theme="dark"]) [data-slot="select-scroll-up-button"],
+body:has([data-admin-theme="dark"]) [data-slot="select-scroll-down-button"] {
+  background-color: #221c19;
+  color: #ece4d8;
 }
 
 /* === Toasts Sonner ===

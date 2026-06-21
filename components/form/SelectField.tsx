@@ -53,7 +53,7 @@ export function SelectField({
       name={name}
       render={({ field }) => (
         <FormItem className={className}>
-          <FormLabel className="text-[10px] tracking-widest uppercase text-[var(--zirel-cafe-topo)]">
+          <FormLabel className="text-[10px] tracking-widest uppercase text-foreground/70">
             {label}
             {required && <span className="text-destructive ml-0.5">*</span>}
           </FormLabel>
@@ -65,7 +65,7 @@ export function SelectField({
             <FormControl>
               <SelectTrigger
                 className={cn(
-                  "w-full rounded-none border border-[var(--zirel-arena)] focus-visible:ring-[var(--zirel-dorado-beige)]"
+                  "w-full rounded-none border border-[var(--zirel-arena)] focus-visible:ring-[var(--zirel-dorado-beige)] px-3"
                 )}
               >
                 <SelectValue placeholder={placeholder} />

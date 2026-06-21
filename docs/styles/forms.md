@@ -126,7 +126,7 @@ export type ProductoInput = z.infer<typeof productoSchema>
 ## Estilos de campo
 
 Los wrappers aplican automáticamente el estilo de campos del proyecto:
-- Label: `text-[10px] tracking-widest uppercase text-[var(--zirel-cafe-topo)]`
+- Label: `text-[10px] tracking-widest uppercase text-foreground/70`
 - Input: `rounded-none border-[var(--zirel-arena)] focus-visible:ring-[var(--zirel-dorado-beige)]`
 - Error: `text-sm font-medium text-destructive` (vía `FormMessage`)
 
