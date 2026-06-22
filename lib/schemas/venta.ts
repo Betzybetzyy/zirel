@@ -14,13 +14,13 @@ export const ventaSchema = z
       error: "Selecciona un método de pago",
     }),
     installmentCount: z.coerce
-      .number()
+      .number<number>()
       .int(msg.number.integer)
       .min(2, msg.number.min(2))
       .max(60, msg.max(60))
       .optional(),
     initialPayment: z.coerce
-      .number()
+      .number<number>()
       .int(msg.number.integer)
       .min(0, msg.number.min(0))
       .optional(),
@@ -32,7 +32,7 @@ export const ventaSchema = z
   )
 
 export const registrarPagoSchema = z.object({
-  amount: z.coerce.number().int(msg.number.integer).min(1, msg.number.min(1)),
+  amount: z.coerce.number<number>().int(msg.number.integer).min(1, msg.number.min(1)),
   method: z.enum(["EFECTIVO", "TRANSFERENCIA"], { error: "Selecciona un método de pago" }),
   note: z.string().max(200, msg.max(200)).optional(),
 })
