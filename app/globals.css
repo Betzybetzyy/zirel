@@ -206,6 +206,29 @@ body:has([data-admin-theme="dark"]) [data-slot="select-scroll-down-button"] {
   color: #C7A87E;
 }
 
+/* === Native date picker icon — Zirel dorado-beige (#C7A87E) ===
+   ::-webkit-calendar-picker-indicator targets the calendar icon in Chromium/Safari.
+   Filter converts the default dark icon to brand gold in both light and dark admin modes. */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.75;
+  filter: invert(72%) sepia(28%) saturate(500%) hue-rotate(356deg) brightness(92%) contrast(88%);
+  transition: opacity 0.15s ease;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+[data-admin-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(72%) sepia(28%) saturate(500%) hue-rotate(356deg) brightness(92%) contrast(88%);
+  opacity: 0.8;
+}
+
+[data-admin-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
 html {
   scroll-behavior: smooth;
 }
