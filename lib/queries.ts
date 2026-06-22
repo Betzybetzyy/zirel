@@ -1,5 +1,6 @@
 import { prisma } from "./prisma";
 import { buildFlagDefaults, FEATURE_FLAGS, type AdminFlag, type FeatureFlagMap } from "./feature-flags";
+import type { SaleStatus, PaymentMethod } from "@prisma/client";
 
 /**
  * Obtiene email y rol de un usuario por su ID (usado en el layout admin)
@@ -173,4 +174,64 @@ export async function getFeaturedProducts(limit = 4) {
     take: limit,
     orderBy: { createdAt: "desc" },
   });
+}
+
+// ── Ventas ─────────────────────────────────────────────────────────────────
+
+export interface SalesFilters {
+  from?: string   // ISO date string (YYYY-MM-DD)
+  to?: string     // ISO date string (YYYY-MM-DD)
+  status?: SaleStatus
+  paymentMethod?: PaymentMethod
+}
+
+/**
+ * Admin: listado de ventas con filtros opcionales (fecha, estado, método de pago)
+ */
+export async function getSalesForAdmin(filters: SalesFilters = {}) {
+  const { from, to, status, paymentMethod } = filters
+
+  return prisma.sale.findMany({
+    where: {
+      ...(from || to
+        ? {
+            createdAt: {
+              ...(from ? { gte: new Date(`${from}T00:00:00.000-04:00`) } : {}),
+              ...(to ? { lte: new Date(`${to}T23:59:59.999-04:00`) } : {}),
+            },
+          }
+        : {}),
+      ...(status ? { status } : {}),
+      ...(paymentMethod ? { paymentMethod } : {}),
+    },
+    include: {
+      items: true,
+      payments: { orderBy: { createdAt: "asc" } },
+    },
+    orderBy: { createdAt: "desc" },
+  })
+}
+
+/**
+ * Admin: una venta por ID con sus items y pagos
+ */
+export async function getSaleForAdmin(id: string) {
+  return prisma.sale.findUnique({
+    where: { id },
+    include: {
+      items: true,
+      payments: { orderBy: { createdAt: "asc" } },
+    },
+  })
+}
+
+/**
+ * Admin: productos activos disponibles para registrar una venta
+ */
+export async function getProductsForSale() {
+  return prisma.product.findMany({
+    where: { active: true },
+    select: { id: true, sku: true, name: true, price: true, stock: true },
+    orderBy: [{ category: { order: "asc" } }, { name: "asc" }],
+  })
 }
