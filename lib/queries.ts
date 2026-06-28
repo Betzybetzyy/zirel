@@ -235,3 +235,50 @@ export async function getProductsForSale() {
     orderBy: [{ category: { order: "asc" } }, { name: "asc" }],
   })
 }
+
+/**
+ * Dashboard: ventas del período + saldos pendientes (PENDIENTE | CUOTAS | ABONO no ANULADA)
+ */
+export async function getDashboardData(from: Date, to: Date) {
+  const [periodSales, pendingSales] = await Promise.all([
+    prisma.sale.findMany({
+      where: {
+        createdAt: { gte: from, lte: to },
+        status: { not: "ANULADA" },
+      },
+      select: {
+        total: true,
+        status: true,
+        createdAt: true,
+        items: {
+          select: {
+            productName: true,
+            productSku: true,
+            quantity: true,
+            productPrice: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "asc" },
+    }),
+    prisma.sale.findMany({
+      where: {
+        status: { not: "ANULADA" },
+        OR: [
+          { status: "PENDIENTE" },
+          { paymentMethod: { in: ["CUOTAS", "ABONO"] } },
+        ],
+      },
+      select: {
+        id: true,
+        saleNumber: true,
+        customerName: true,
+        total: true,
+        createdAt: true,
+        payments: { select: { amount: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    }),
+  ])
+  return { periodSales, pendingSales }
+}
