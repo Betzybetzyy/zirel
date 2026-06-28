@@ -23,6 +23,7 @@ import {
   FormItem,
   FormControl,
   FormMessage,
+  FormLabel,
 } from "@/components/ui/form"
 import { TextField } from "@/components/form/TextField"
 import { Input } from "@/components/ui/input"
@@ -31,6 +32,7 @@ import { Button } from "@/components/ui/button"
 import { formatCLP } from "@/lib/utils-format"
 import { ventaSchema, type VentaInput } from "@/lib/schemas/venta"
 import { createSale } from "@/app/actions/ventas"
+import { ClienteQuickCreate } from "@/components/admin/cliente-quick-create"
 
 interface ProductOption {
   id: string
@@ -40,8 +42,15 @@ interface ProductOption {
   stock: number
 }
 
+interface ClienteOption {
+  id: string
+  name: string
+  phone: string | null
+}
+
 interface VentaFormProps {
   products: ProductOption[]
+  clientes: ClienteOption[]
 }
 
 function SectionLabel({ label }: { label: string }) {
@@ -421,13 +430,15 @@ function CreditField({
 }
 
 // ── Main form ────────────────────────────────────────────────────────────────
-export function VentaForm({ products }: VentaFormProps) {
+export function VentaForm({ products, clientes }: VentaFormProps) {
   const router = useRouter()
+  // Local copy so new quick-created clients appear without page reload
+  const [clienteOptions, setClienteOptions] = useState<ClienteOption[]>(clientes)
 
   const form = useForm<VentaInput>({
     resolver: zodResolver(ventaSchema),
     defaultValues: {
-      customerName: "",
+      customerId: "",
       customerNotes: "",
       paymentMethod: "EFECTIVO",
       items: [{ productId: "", quantity: 1 }],
@@ -702,18 +713,59 @@ export function VentaForm({ products }: VentaFormProps) {
             )}
           </div>
 
-          {/* ── Cliente (opcional) ── */}
+          {/* ── Cliente ── */}
           <div className="space-y-4">
-            <SectionLabel label="Cliente (opcional)" />
+            <SectionLabel label="Cliente" />
             <div className="grid md:grid-cols-2 gap-4">
-              <TextField
-                name="customerName"
-                label="Nombre del cliente"
-                placeholder="Ej: María González"
+              <FormField
+                control={form.control}
+                name="customerId"
+                render={({ field, fieldState }) => (
+                  <FormItem className="space-y-1.5">
+                    <FormLabel
+                      className="text-[10px] tracking-widest uppercase text-[var(--muted-foreground)] font-normal"
+                      style={{ fontFamily: "var(--font-nunito)" }}
+                    >
+                      Cliente <span className="text-destructive">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <div className="flex gap-2">
+                        <select
+                          value={field.value}
+                          onChange={field.onChange}
+                          className={cn(
+                            "flex-1 h-9 rounded-md border px-3 text-sm bg-background",
+                            "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-0",
+                            "text-[var(--foreground)]",
+                            fieldState.error ? "border-destructive" : "border-input",
+                          )}
+                          style={{ fontFamily: "var(--font-nunito)" }}
+                        >
+                          <option value="">Seleccionar cliente…</option>
+                          {clienteOptions.map((c) => (
+                            <option key={c.id} value={c.id}>
+                              {c.name}{c.phone ? ` · ${c.phone}` : ""}
+                            </option>
+                          ))}
+                        </select>
+                        <ClienteQuickCreate
+                          onCreated={(newCliente) => {
+                            setClienteOptions((prev) => [
+                              ...prev,
+                              newCliente,
+                            ].sort((a, b) => a.name.localeCompare(b.name)))
+                            form.setValue("customerId", newCliente.id, { shouldValidate: true })
+                          }}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
               <TextField
                 name="customerNotes"
-                label="Notas"
+                label="Notas de la venta"
                 multiline
                 placeholder="Instrucciones o referencias…"
               />

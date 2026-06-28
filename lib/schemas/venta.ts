@@ -8,7 +8,7 @@ export const ventaItemSchema = z.object({
 
 export const ventaSchema = z
   .object({
-    customerName: z.string().max(100, msg.max(100)).optional(),
+    customerId: z.string().min(1, "Selecciona un cliente"),
     customerNotes: z.string().max(500, msg.max(500)).optional(),
     paymentMethod: z.enum(["EFECTIVO", "TRANSFERENCIA", "CUOTAS", "ABONO"], {
       error: "Selecciona un método de pago",

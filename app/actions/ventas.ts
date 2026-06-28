@@ -18,11 +18,17 @@ export async function createSale(data: VentaInput) {
     return { success: false as const, error: "Datos inválidos" }
   }
 
-  const { items, paymentMethod, customerName, customerNotes, installmentCount, initialPayment } =
+  const { items, paymentMethod, customerId, customerNotes, installmentCount, initialPayment } =
     parsed.data
 
   try {
     const sale = await prisma.$transaction(async (tx) => {
+      const customer = await tx.customer.findUnique({
+        where: { id: customerId },
+        select: { id: true, name: true },
+      })
+      if (!customer) throw new Error("Cliente no encontrado")
+
       const productIds = items.map((i) => i.productId)
       if (new Set(productIds).size !== productIds.length) {
         throw new Error("No puedes agregar el mismo producto dos veces")
@@ -80,7 +86,8 @@ export async function createSale(data: VentaInput) {
 
       const created = await tx.sale.create({
         data: {
-          customerName: customerName || null,
+          customerId: customer.id,
+          customerName: customer.name,
           customerNotes: customerNotes || null,
           subtotal,
           total: subtotal,

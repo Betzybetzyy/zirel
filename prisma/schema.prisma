@@ -157,6 +157,25 @@ model User {
 }
 
 // ============================================
+// CLIENTES (registro interno de compradores frecuentes)
+// ============================================
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String?
+  email     String?
+  address   String?
+  notes     String?
+
+  sales     Sale[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("customers")
+}
+
+// ============================================
 // VENTAS (POS interno — admin registra ventas presenciales)
 // ============================================
 enum SaleStatus {
@@ -176,7 +195,9 @@ model Sale {
   id            String        @id @default(cuid())
   saleNumber    Int           @unique @default(autoincrement())
 
-  customerName  String?       // Opcional; sin modelo Customer propio aún
+  customerId    String?
+  customer      Customer?     @relation(fields: [customerId], references: [id])
+  customerName  String?       // Snapshot del nombre al momento de la venta
   customerNotes String?
 
   subtotal      Int
@@ -196,6 +217,7 @@ model Sale {
   @@map("sales")
   @@index([status])
   @@index([createdAt])
+  @@index([customerId])
 }
 
 model SaleItem {

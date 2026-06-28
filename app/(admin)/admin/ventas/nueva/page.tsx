@@ -1,13 +1,13 @@
 import { verifyAdmin } from "@/lib/dal"
 import { PageMeta } from "@/components/admin/page-meta"
-import { getProductsForSale } from "@/lib/queries"
+import { getProductsForSale, getCustomersForSelect } from "@/lib/queries"
 import { VentaForm } from "@/components/admin/venta-form"
 
 export const metadata = { title: "Nueva venta – Zirel Admin" }
 
 export default async function NuevaVentaPage() {
   await verifyAdmin()
-  const products = await getProductsForSale()
+  const [products, clientes] = await Promise.all([getProductsForSale(), getCustomersForSelect()])
 
   return (
     <>
@@ -44,7 +44,7 @@ export default async function NuevaVentaPage() {
               No hay productos activos disponibles para vender.
             </p>
           ) : (
-            <VentaForm products={products} />
+            <VentaForm products={products} clientes={clientes} />
           )}
         </div>
       </div>

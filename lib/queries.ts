@@ -236,6 +236,50 @@ export async function getProductsForSale() {
   })
 }
 
+// ── Clientes ────────────────────────────────────────────────────────────────
+
+export async function getCustomersForAdmin() {
+  return prisma.customer.findMany({
+    include: {
+      sales: {
+        where: { status: { not: "ANULADA" } },
+        select: {
+          id: true,
+          saleNumber: true,
+          total: true,
+          status: true,
+          createdAt: true,
+          payments: { select: { amount: true } },
+        },
+      },
+    },
+    orderBy: { name: "asc" },
+  })
+}
+
+export async function getCustomerForAdmin(id: string) {
+  return prisma.customer.findUnique({
+    where: { id },
+    include: {
+      sales: {
+        where: { status: { not: "ANULADA" } },
+        include: {
+          items: true,
+          payments: { orderBy: { createdAt: "asc" } },
+        },
+        orderBy: { createdAt: "desc" },
+      },
+    },
+  })
+}
+
+export async function getCustomersForSelect() {
+  return prisma.customer.findMany({
+    select: { id: true, name: true, phone: true },
+    orderBy: { name: "asc" },
+  })
+}
+
 /**
  * Dashboard: ventas del período + saldos pendientes (PENDIENTE | CUOTAS | ABONO no ANULADA)
  */
