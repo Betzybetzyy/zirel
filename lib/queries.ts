@@ -22,6 +22,16 @@ export async function getCategories() {
 }
 
 /**
+ * Admin: categorías con conteo de productos
+ */
+export async function getCategoriesForAdmin() {
+  return prisma.category.findMany({
+    orderBy: [{ order: "asc" }, { name: "asc" }],
+    include: { _count: { select: { products: true } } },
+  });
+}
+
+/**
  * Obtiene una categoría por su slug, con sus productos activos
  */
 export async function getCategoryBySlug(slug: string) {
