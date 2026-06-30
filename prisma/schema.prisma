@@ -157,6 +157,102 @@ model User {
 }
 
 // ============================================
+// CLIENTES (registro interno de compradores frecuentes)
+// ============================================
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String?
+  email     String?
+  address   String?
+  notes     String?
+
+  sales     Sale[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("customers")
+}
+
+// ============================================
+// VENTAS (POS interno — admin registra ventas presenciales)
+// ============================================
+enum SaleStatus {
+  PENDIENTE
+  COMPLETADA
+  ANULADA
+}
+
+enum PaymentMethod {
+  EFECTIVO
+  TRANSFERENCIA
+  CUOTAS
+  ABONO
+}
+
+model Sale {
+  id            String        @id @default(cuid())
+  saleNumber    Int           @unique @default(autoincrement())
+
+  customerId    String?
+  customer      Customer?     @relation(fields: [customerId], references: [id])
+  customerName  String?       // Snapshot del nombre al momento de la venta
+  customerNotes String?
+
+  subtotal      Int
+  total         Int           // = subtotal (sin IVA ni descuento)
+
+  paymentMethod    PaymentMethod
+  status           SaleStatus    @default(COMPLETADA)
+  installmentCount Int?          // nº de cuotas pactadas (solo CUOTAS)
+
+  items            SaleItem[]
+  payments         SalePayment[]
+
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  annulledAt       DateTime?
+
+  @@map("sales")
+  @@index([status])
+  @@index([createdAt])
+  @@index([customerId])
+}
+
+model SaleItem {
+  id           String   @id @default(cuid())
+
+  saleId       String
+  sale         Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+
+  productId    String                               // FK al producto (puede haberse borrado)
+  productSku   String                               // Snapshot
+  productName  String                               // Snapshot
+  productPrice Int                                  // Precio al momento de la venta
+  quantity     Int
+
+  createdAt    DateTime @default(now())
+
+  @@map("sale_items")
+  @@index([saleId])
+}
+
+model SalePayment {
+  id                Int           @id @default(autoincrement())
+  saleId            String
+  sale              Sale          @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  amount            Int
+  method            PaymentMethod
+  installmentNumber Int?
+  note              String?
+  createdAt         DateTime      @default(now())
+
+  @@map("sale_payments")
+  @@index([saleId])
+}
+
+// ============================================
 // FEATURE FLAGS (control de funcionalidades)
 // ============================================
 model FeatureFlag {

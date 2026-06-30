@@ -1,0 +1,113 @@
+"use client"
+
+import { useState, useTransition } from "react"
+import { useRouter } from "next/navigation"
+import { Trash2 } from "lucide-react"
+import { sileo } from "sileo"
+import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
+import { deleteCategoria } from "@/app/actions/categorias"
+import { useAdminUIStore } from "@/lib/admin-ui-store"
+
+interface Props {
+  id: string
+  name: string
+  productCount: number
+}
+
+export function CategoriaDeleteDialog({ id, name, productCount }: Props) {
+  const adminTheme = useAdminUIStore((s) => s.theme)
+  const [open, setOpen] = useState(false)
+  const [isPending, startTransition] = useTransition()
+  const router = useRouter()
+
+  const hasProducts = productCount > 0
+
+  function handleDelete() {
+    startTransition(async () => {
+      const result = await deleteCategoria(id)
+      if (!result.success) {
+        sileo.error({
+          title: "No se puede eliminar",
+          description: result.error ?? "Error al eliminar la categoría.",
+        })
+        setOpen(false)
+        return
+      }
+      sileo.success({
+        title: "Categoría eliminada",
+        description: `"${name}" fue eliminada correctamente.`,
+      })
+      setOpen(false)
+      router.refresh()
+    })
+  }
+
+  return (
+    <>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => setOpen(true)}
+        disabled={hasProducts}
+        title={hasProducts ? `Tiene ${productCount} producto${productCount > 1 ? "s" : ""} asociado${productCount > 1 ? "s" : ""}` : "Eliminar"}
+        className="size-8 text-[var(--muted-foreground)] hover:text-destructive hover:bg-destructive/10 disabled:opacity-30 disabled:cursor-not-allowed"
+      >
+        <Trash2 className="size-3.5" />
+      </Button>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent
+          data-admin-theme={adminTheme}
+          className="max-w-sm rounded-2xl overflow-hidden p-0"
+        >
+          <div
+            className="px-5 py-4 border-b border-[var(--border)]"
+            style={{
+              background:
+                adminTheme === "dark"
+                  ? "var(--secondary)"
+                  : "color-mix(in srgb, var(--zirel-marfil) 50%, white)",
+            }}
+          >
+            <DialogTitle
+              className="text-sm font-semibold tracking-widest uppercase text-[var(--foreground)]"
+              style={{ fontFamily: "var(--font-nunito)" }}
+            >
+              Eliminar categoría
+            </DialogTitle>
+          </div>
+
+          <div className="px-5 py-5">
+            <p
+              className="text-sm text-[var(--foreground)] leading-relaxed"
+              style={{ fontFamily: "var(--font-nunito)" }}
+            >
+              ¿Seguro que quieres eliminar{" "}
+              <span className="font-semibold">&ldquo;{name}&rdquo;</span>? Esta
+              acción no se puede deshacer.
+            </p>
+          </div>
+
+          <div className="flex gap-3 px-5 pb-5">
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => setOpen(false)}
+              disabled={isPending}
+            >
+              Cancelar
+            </Button>
+            <Button
+              className="flex-1 bg-destructive text-destructive-foreground hover:bg-destructive/90 border-0 font-semibold"
+              onClick={handleDelete}
+              disabled={isPending}
+            >
+              {isPending ? "Eliminando…" : "Eliminar"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  )
+}
