@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ProductGrid } from "@/components/ui/product-grid";
+import { Manifesto } from "@/components/ui/manifesto";
 import { getFeaturedProducts, getCategories } from "@/lib/queries";
 
 export default async function Home() {
@@ -170,18 +171,7 @@ export default async function Home() {
       </section>
 
       {/* MANIFESTO */}
-      <section className="bg-[var(--surface-inverse)] py-28 px-6">
-        <div className="mx-auto max-w-2xl text-center">
-          <div className="w-14 h-px bg-[var(--zirel-dorado-beige)]/35 mx-auto mb-12" />
-          <blockquote className="font-serif text-3xl md:text-4xl lg:text-[2.6rem] text-[var(--on-surface-inverse)] leading-snug italic">
-            &ldquo;Cada joya nace con la intención de acompañarte en los momentos que importan.&rdquo;
-          </blockquote>
-          <div className="w-14 h-px bg-[var(--zirel-dorado-beige)]/35 mx-auto mt-12 mb-8" />
-          <span className="text-[var(--zirel-dorado-beige)] text-[10px] tracking-[0.4em] uppercase">
-            Zirel Joyería · Oro & Plata
-          </span>
-        </div>
-      </section>
+      <Manifesto quote="Cada joya nace con la intención de acompañarte en los momentos que importan." />
     </>
   );
 }
