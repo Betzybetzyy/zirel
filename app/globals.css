@@ -17,6 +17,9 @@
   --surface-inverse: #2B2623;
   --on-surface-inverse: #F7F3EE;
 
+  /* Quiet label text on dark/near-black strips (trust strip) */
+  --trust-label: var(--zirel-cafe-topo);
+
   /* === Admin sidebar — light mode === */
   --admin-sidebar-bg: #FFFFFF;
   --admin-sidebar-text: #5c4a3b;
@@ -102,6 +105,8 @@
 
   --surface-inverse: #191411;
   --on-surface-inverse: #ece4d8;
+
+  --trust-label: #6b6055;
 }
 
 /* === Admin dark theme === */

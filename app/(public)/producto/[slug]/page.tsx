@@ -1,13 +1,11 @@
 import { getProductBySlug, getFeatureFlags } from "@/lib/queries";
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import { AddToCartButton } from "@/components/ui/add-to-cart-button";
-
-function normalizeCloudinaryUrl(url: string, size = 1200): string {
-  if (!url.includes("res.cloudinary.com")) return url;
-  return url.replace("/upload/", `/upload/f_auto,q_auto,w_${size},h_${size},c_pad,b_rgb:FFFFFF/`);
-}
+import { ProductGallery } from "@/components/ui/product-gallery";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { StockBadge } from "@/components/ui/stock-badge";
+import { Badge } from "@/components/ui/badge";
 
 export async function generateMetadata({
   params,
@@ -45,31 +43,19 @@ export default async function ProductPage({
     maximumFractionDigits: 0,
   }).format(product.price);
 
-  const mainImage = product.images[0];
-
   return (
     <>
       {/* HEADER con breadcrumb */}
       <section className="pt-24 pb-6 px-6">
         <div className="mx-auto max-w-7xl">
-          <nav className="text-[9px] tracking-[0.35em] uppercase text-[var(--zirel-cafe-topo)]/60 flex items-center gap-2">
-            <Link href="/" className="hover:text-[var(--zirel-dorado-beige)] transition-colors duration-200">
-              Inicio
-            </Link>
-            <span className="text-[var(--zirel-dorado-beige)]/40">·</span>
-            <Link href="/catalogo" className="hover:text-[var(--zirel-dorado-beige)] transition-colors duration-200">
-              Catálogo
-            </Link>
-            <span className="text-[var(--zirel-dorado-beige)]/40">·</span>
-            <Link
-              href={`/catalogo/${product.category.slug}`}
-              className="hover:text-[var(--zirel-dorado-beige)] transition-colors duration-200"
-            >
-              {product.category.name}
-            </Link>
-            <span className="text-[var(--zirel-dorado-beige)]/40">·</span>
-            <span className="text-[var(--zirel-negro-suave)]">{product.name}</span>
-          </nav>
+          <Breadcrumbs
+            items={[
+              { label: "Inicio", href: "/" },
+              { label: "Catálogo", href: "/catalogo" },
+              { label: product.category.name, href: `/catalogo/${product.category.slug}` },
+              { label: product.name },
+            ]}
+          />
         </div>
       </section>
 
@@ -79,62 +65,7 @@ export default async function ProductPage({
 
           {/* GALERÍA */}
           <div>
-            {/* Imagen principal con frame editorial */}
-            <div className="relative">
-              {/* Corner accent brackets */}
-              <div className="absolute -top-3 -left-3 w-8 h-8 border-t-2 border-l-2 border-[var(--zirel-dorado-beige)]/50 pointer-events-none z-10" />
-              <div className="absolute -top-3 -right-3 w-8 h-8 border-t-2 border-r-2 border-[var(--zirel-dorado-beige)]/50 pointer-events-none z-10" />
-              <div className="absolute -bottom-3 -left-3 w-8 h-8 border-b-2 border-l-2 border-[var(--zirel-dorado-beige)]/50 pointer-events-none z-10" />
-              <div className="absolute -bottom-3 -right-3 w-8 h-8 border-b-2 border-r-2 border-[var(--zirel-dorado-beige)]/50 pointer-events-none z-10" />
-
-              <div className="relative aspect-square bg-[var(--zirel-marfil)] overflow-hidden">
-                {mainImage ? (
-                  <Image
-                    src={normalizeCloudinaryUrl(mainImage.url, 1200)}
-                    alt={mainImage.alt || product.name}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    className="object-contain"
-                                        priority
-                  />
-                ) : (
-                  <div className="flex items-center justify-center h-full text-[var(--zirel-cafe-topo)]/40 font-serif italic text-sm">
-                    Sin imagen
-                  </div>
-                )}
-                {/* Uniform inner border */}
-                <div className="absolute inset-0 shadow-[inset_0_0_0_1px_rgba(43,38,35,0.08)] pointer-events-none" />
-              </div>
-            </div>
-
-            {/* Thumbnails */}
-            {product.images.length > 1 && (
-              <div className="grid grid-cols-4 gap-2 mt-3">
-                {product.images.map((img, i) => (
-                  <div
-                    key={img.id}
-                    className={`relative aspect-square overflow-hidden bg-[var(--zirel-marfil)] transition-all duration-200 ${
-                      i === 0
-                        ? "shadow-[inset_0_0_0_1.5px_var(--zirel-dorado-beige)]"
-                        : "shadow-[inset_0_0_0_1px_rgba(43,38,35,0.08)] hover:shadow-[inset_0_0_0_1.5px_var(--zirel-dorado-beige)]"
-                    }`}
-                  >
-                    <Image
-                      src={normalizeCloudinaryUrl(img.url, 300)}
-                      alt={img.alt || product.name}
-                      fill
-                      sizes="15vw"
-                      className="object-contain"
-                                          />
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* SKU debajo de imagen */}
-            <p className="text-[9px] tracking-[0.35em] uppercase text-[var(--zirel-cafe-topo)]/35 mt-5 text-center">
-              Ref. {product.sku}
-            </p>
+            <ProductGallery images={product.images} productName={product.name} />
           </div>
 
           {/* INFO DEL PRODUCTO — sticky en desktop */}
@@ -145,8 +76,11 @@ export default async function ProductPage({
               <span className="text-[var(--zirel-dorado-beige)] text-[10px] tracking-[0.35em] uppercase block mb-4">
                 ✦ {product.category.name}
               </span>
-              <h1 className="font-serif text-3xl md:text-4xl text-[var(--zirel-negro-suave)] mb-5 leading-tight">
-                {product.name}
+              <h1 className="font-serif text-3xl md:text-4xl text-[var(--zirel-negro-suave)] leading-tight mb-5">
+                {product.name}{" "}
+                <Badge className="align-middle border border-[var(--zirel-arena)] px-2.5 py-1 text-[9px] tracking-[0.15em] text-[var(--zirel-cafe-topo)] font-mono">
+                  {product.sku}
+                </Badge>
               </h1>
               <div className="w-12 h-px bg-[var(--zirel-dorado-beige)]" />
             </div>
@@ -196,10 +130,10 @@ export default async function ProductPage({
 
                 <div className="flex justify-between items-baseline py-2.5">
                   <span className="text-[11px] tracking-[0.2em] uppercase text-[var(--zirel-cafe-topo)]/70">
-                    SKU
+                    Disponibilidad
                   </span>
-                  <span className="font-mono text-[11px] text-[var(--zirel-cafe-topo)]/60">
-                    {product.sku}
+                  <span className="font-serif text-[var(--zirel-negro-suave)] text-sm">
+                    {product.stock > 0 ? "En stock" : "Agotado"}
                   </span>
                 </div>
               </div>
@@ -207,13 +141,17 @@ export default async function ProductPage({
 
             {/* Precio + CTA */}
             <div className="border-t border-[var(--zirel-arena)]/50 pt-8">
-              <div className="flex items-baseline justify-between mb-6">
+              <div className="flex items-baseline justify-between mb-3">
                 <span className="text-[10px] tracking-[0.3em] uppercase text-[var(--zirel-cafe-topo)]/60">
                   Precio
                 </span>
                 <span className="font-serif text-3xl text-[var(--zirel-negro-suave)] tracking-tight font-variant-numeric tabular-nums">
                   {formattedPrice}
                 </span>
+              </div>
+
+              <div className="mb-6">
+                <StockBadge stock={product.stock} className="inline-block" />
               </div>
 
               {flags.cart && (
@@ -223,7 +161,8 @@ export default async function ProductPage({
                   slug={product.slug}
                   name={product.name}
                   price={product.price}
-                  imageUrl={mainImage?.url}
+                  stock={product.stock}
+                  imageUrl={product.images[0]?.url}
                 />
               )}
 
@@ -250,7 +189,7 @@ export default async function ProductPage({
             { label: "Pieza única", sub: "Seleccionada para ti" },
           ].map((item) => (
             <li key={item.sub} className="flex flex-col items-center text-center md:px-8 gap-1">
-              <span className="text-[var(--zirel-cafe-topo)] text-[10px] tracking-[0.25em] uppercase font-medium">
+              <span className="text-[var(--trust-label)] text-[10px] tracking-[0.25em] uppercase font-medium">
                 {item.label}
               </span>
               <span className="text-[var(--zirel-cafe-topo)]/40 text-[10px]">
@@ -266,7 +205,7 @@ export default async function ProductPage({
         <div className="mx-auto max-w-2xl text-center">
           <div className="w-14 h-px bg-[var(--zirel-dorado-beige)]/35 mx-auto mb-10" />
           <blockquote className="font-serif text-2xl md:text-3xl text-[var(--zirel-marfil)] leading-snug italic">
-            "Cada joya nace con la intención de acompañarte en los momentos que importan."
+            &ldquo;Cada joya nace con la intención de acompañarte en los momentos que importan.&rdquo;
           </blockquote>
           <div className="w-14 h-px bg-[var(--zirel-dorado-beige)]/35 mx-auto mt-10 mb-7" />
           <span className="text-[var(--zirel-dorado-beige)] text-[10px] tracking-[0.4em] uppercase">

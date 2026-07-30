@@ -11,6 +11,8 @@ export type CartItem = {
   price: number;
   imageUrl?: string;
   quantity: number;
+  /** Stock disponible al momento de agregar. Sin tope si no viene (items viejos en localStorage). */
+  maxQuantity?: number;
 };
 
 type CartStore = {
@@ -34,13 +36,21 @@ export const useCartStore = create<CartStore>()(
       isOpen: false,
 
       addItem: (item) => {
+        const { maxQuantity } = item;
+        // stock 0 no debería llegar acá (el botón se deshabilita), pero por si acaso.
+        if (maxQuantity !== undefined && maxQuantity <= 0) return;
+
         const existing = get().items.find((i) => i.productId === item.productId);
 
         if (existing) {
+          const nextQuantity =
+            maxQuantity !== undefined
+              ? Math.min(existing.quantity + 1, maxQuantity)
+              : existing.quantity + 1;
           set({
             items: get().items.map((i) =>
               i.productId === item.productId
-                ? { ...i, quantity: i.quantity + 1 }
+                ? { ...i, quantity: nextQuantity, maxQuantity }
                 : i
             ),
           });
@@ -58,9 +68,11 @@ export const useCartStore = create<CartStore>()(
           return;
         }
         set({
-          items: get().items.map((i) =>
-            i.productId === productId ? { ...i, quantity } : i
-          ),
+          items: get().items.map((i) => {
+            if (i.productId !== productId) return i;
+            const capped = i.maxQuantity !== undefined ? Math.min(quantity, i.maxQuantity) : quantity;
+            return { ...i, quantity: capped };
+          }),
         });
       },
 

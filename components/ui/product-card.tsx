@@ -1,10 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
+import { StockBadge } from "./stock-badge";
 
 type ProductCardProps = {
   slug: string;
   name: string;
   price: number;
+  stock: number;
   imageUrl?: string;
   imageAlt?: string;
 };
@@ -14,8 +16,9 @@ function normalizeCloudinaryUrl(url: string): string {
   return url.replace("/upload/", "/upload/f_auto,q_auto,w_600,h_600,c_pad,b_rgb:FFFFFF/");
 }
 
-export function ProductCard({ slug, name, price, imageUrl, imageAlt }: ProductCardProps) {
+export function ProductCard({ slug, name, price, stock, imageUrl, imageAlt }: ProductCardProps) {
   const normalizedImageUrl = imageUrl ? normalizeCloudinaryUrl(imageUrl) : undefined;
+  const soldOut = stock <= 0;
   const formattedPrice = new Intl.NumberFormat("es-CL", {
     style: "currency",
     currency: "CLP",
@@ -23,7 +26,10 @@ export function ProductCard({ slug, name, price, imageUrl, imageAlt }: ProductCa
   }).format(price);
 
   return (
-    <Link href={`/producto/${slug}`} className="group block">
+    <Link
+      href={`/producto/${slug}`}
+      className="group block outline-none focus-visible:ring-2 focus-visible:ring-[var(--zirel-dorado-beige)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--zirel-marfil)]"
+    >
       {/* Image container */}
       <div className="relative aspect-square bg-[var(--zirel-marfil)] mb-4 overflow-hidden">
         {normalizedImageUrl ? (
@@ -32,7 +38,7 @@ export function ProductCard({ slug, name, price, imageUrl, imageAlt }: ProductCa
             alt={imageAlt || name}
             fill
             sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-            className="object-contain transition-transform duration-700 group-hover:scale-103"
+            className={`object-contain transition-transform duration-700 group-hover:scale-103 ${soldOut ? "opacity-60 grayscale-[35%]" : ""}`}
           />
         ) : (
           <div className="flex items-center justify-center h-full text-[var(--zirel-cafe-topo)]/40 text-xs font-serif italic">
@@ -43,10 +49,16 @@ export function ProductCard({ slug, name, price, imageUrl, imageAlt }: ProductCa
         {/* Uniform inner border — frames all images consistently */}
         <div className="absolute inset-0 shadow-[inset_0_0_0_1px_rgba(43,38,35,0.07)] pointer-events-none z-10" />
 
+        {(stock > 0 && stock <= 3) || soldOut ? (
+          <div className="absolute top-2.5 left-2.5 z-20">
+            <StockBadge stock={stock} />
+          </div>
+        ) : null}
+
         {/* Hover overlay */}
         <div className="absolute inset-0 bg-[var(--zirel-negro-suave)]/0 group-hover:bg-[var(--zirel-negro-suave)]/30 transition-all duration-300 flex items-end justify-center pb-5 pointer-events-none z-20">
           <span className="text-[var(--zirel-marfil)] text-[10px] tracking-[0.3em] uppercase opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
-            Ver pieza
+            {soldOut ? "Ver detalle" : "Ver pieza"}
           </span>
         </div>
 
